@@ -1,2 +1,6 @@
+import pandas as pd
+
+
 def decision_tree(df):
-    pass
+    for col in df.cols:
+        print(col)
