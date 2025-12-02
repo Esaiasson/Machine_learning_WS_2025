@@ -35,26 +35,29 @@ def splitting_measure(df, target):
     Finds the values for different splitting measures per attribute in the dataframe
     Parameters:
         df: A pandas DataFrame 
+        target: A name of a column in the df that acts as the target attribute 
     '''
-    attribute_sse = {}
+    
+    attribute_sse = {} #Dictionary for keeping track of the best split for each attribute 
     for col in df.columns:
-        if col != target:
-            split_candidate = df[[col, target]]
-            split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True)
-            n = len(split_candidate_sorted)
-            split_sse = {}
+        if col != target: #Don't calculate SSE for the target column
+            split_candidate = df[[col, target]] #Create a new dataframe with only one column and the target attribute
+            split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True) #Sort the dataframe by the predictor attribute
+            n = len(split_candidate_sorted) #number of rows 
+            split_sse = {} #Dictionary for storing the sse for each split value
             
-            for i in range(0,n):
-                #Calculates the sse for each possible split, the sse is saved with the key of x for which the split is val > x
+            for i in range(0,n): #Itterate over all splot values
+                #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
                 split_sse[split_candidate_sorted.loc[i,col]] = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
             
-            min_sse_split_value = min(split_sse, key=split_sse.get)
-            attribute_sse[split_sse.get(min_sse_split_value)] = {"attribute": col, "split_value": min_sse_split_value}
+
+            min_sse_split_value = min(split_sse, key=split_sse.get) #Gets the key of the item with the minimum SSE value
+            attribute_sse[split_sse.get(min_sse_split_value)] = {"attribute": col, "split_value": min_sse_split_value} #Stores the SSE as the key, with the split value and column namn for later comparison
     
-    best_split_sse =  min(attribute_sse)
-    best_split = attribute_sse.get(best_split_sse)
-    split_by_attribute = best_split["attribute"]
-    split_by_value = best_split["split_value"]
+    best_split_sse =  min(attribute_sse) #The minimum SSE 
+    best_split = attribute_sse.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
+    split_by_attribute = best_split["attribute"] #Extracts the attribute name for the min SSE value
+    split_by_value = best_split["split_value"] #Extracts the split value that gave the min SSE
     return split_by_attribute, split_by_value
 
 
