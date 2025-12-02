@@ -6,16 +6,21 @@ food_waste = pd.read_csv("data/food_wastage_data.csv")
 
 
 def mean(series):
-    n = series.size # Number of rows in the series
-    return series.sum()/n
+
+    try:
+        n = series.size # Number of rows in the series
+        print(f'n: {n}')
+        return series.sum()/n
+    except:
+        print('error')
 
 def sse(split_1, split_2):
     
     mean_split_1 = mean(split_1)
     mean_split_2 = mean(split_2) 
 
-    print(mean_split_1)    
-    print(mean_split_2)
+    print(f'mean_split_1:{mean_split_1}')    
+    print(f'mean_split_2:{mean_split_2}')    
 
 
 def splitting_measure(df, target):
@@ -28,10 +33,11 @@ def splitting_measure(df, target):
     for col in df.columns:
         split_candidate = df[[col, target]]
         split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True)
-        n = split_candidate_sorted.size
+        n = len(split_candidate_sorted)
         split_variance = {}
         for i in range(0,n):
-            sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[(i): , target])
+            print(f'i: {i}')
+            sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
             #if attribute_sorted.loc[(i+1):]: #Ensures the split actually consists of values
                 #print(attribute_sorted.loc[(i+1):])
             #attribute_variance[col] = std_dev(attribute_sorted)
@@ -53,7 +59,7 @@ def std_dev(attribute):
     for value in numeric_attribute: #Calculates the deviation from the mean for every value in the series
         mean_deviation = mean_deviation + ((value-mean)**2) 
     standard_deviation = math.sqrt(mean_deviation/(n-1)) # Formula for standard deviation
-    
+
     return standard_deviation
 
 
