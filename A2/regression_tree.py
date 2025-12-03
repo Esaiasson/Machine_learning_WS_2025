@@ -8,11 +8,21 @@ food_waste = pd.read_csv("data/food_wastage_data.csv")
 
 
 def mean(series):
-
+    '''
+    Calculates the mean of a series
+    Parameters:
+        series: A pandas series
+    '''
     n = series.size # Number of rows in the series
     return series.sum()/n
 
 def sse(split_1, split_2):
+    '''
+    Calculates the SSE of two series
+    Parameters:
+        split_1: A pandas series
+        split_2: A pandas series
+    '''
     
     mean_split_1 = mean(split_1)
     mean_split_2 = mean(split_2) 
@@ -27,17 +37,16 @@ def sse(split_1, split_2):
     sse = (sse_split_1 + sse_split_2)
 
     return sse
-    
 
 
-
-
-def splitting_measure(df, target, max_features=None):
+def splitting_measure(df, target, split_criterion, max_features=None):
     '''
     Finds the values for different splitting measures per attribute in the dataframe
     Parameters:
         df: A pandas DataFrame 
         target: A name of a column in the df that acts as the target attribute 
+        split_criterion: name of method that will be used to evaluate the split
+            Allowed values: "sse"
         max_features: Number of attributes to be considered for best split. If no value is supplied, the value will be equal to the number of attributes in the dataframe
     Returns:
         A dictionary of the best spliting criterion containing the following:
@@ -61,17 +70,18 @@ def splitting_measure(df, target, max_features=None):
             split_candidate = df[[col, target]] #Create a new dataframe with only one column and the target attribute
             split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True) #Sort the dataframe by the predictor attribute
             n = len(split_candidate_sorted) #number of rows 
-            split_sse = {} #Dictionary for storing the sse for each split value
-            for i in range(0,n): #Itterate over all splot values
-                #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
-                sse_value = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
-                #Store the results of the SSE function as a value belonging the key which is the split value
-                split_sse[split_candidate_sorted.loc[i,col]] = sse_value
+            split_scores = {} #Dictionary for storing the sse for each split value
+            for i in range(0,n): #Itterate over all split values
+                if split_criterion == "sse":
+                    #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
+                    score = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+                #Store the results of the evaluation function as a value belonging the key which is the split value
+                split_scores[split_candidate_sorted.loc[i,col]] = score
 
-            min_sse_split_value = min(split_sse, key=split_sse.get) #The gets the key having the minimum value
-            min_sse = split_sse.get(min_sse_split_value)
+            min_score_split_value = min(split_scores, key=split_scores.get) #Gets the key having the minimum value
+            min_score = split_scores.get(min_score_split_value)
             #Stores the SSE as the key, with the split value and attribute name
-            attribute_sse[min_sse] = {"attribute": col, "split_value": min_sse_split_value}
+            attribute_sse[min_score] = {"attribute": col, "split_value": min_score_split_value}
 
     best_split_sse =  min(attribute_sse) #The minimum SSE 
     best_split_dict = attribute_sse.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
@@ -127,10 +137,9 @@ def evaluate_stopping_criterion(stop, df_length, current_depth=None):
                     return False
                 
         return True
-        
 
 
-def build_tree(df, target, depth, stop):
+def build_tree(df, target, depth, stop, split_criterion, max_features):
     '''
     Creates linked instances of the class Node
     Parameters:
@@ -138,15 +147,18 @@ def build_tree(df, target, depth, stop):
         target: A column name in df that will be the class to be predicted
         depth: The current depth of the node 
         stop: A list of dictionaries containing the stoping criterion.
-        Allowed keys and values in each dictionary:
-            stopping_criterion: A string describing the stopping criterion 
-                Allowed values: "max_depth", "min_samples_split"
-            stop_value: The value for which the stopping criteria will be evaulated against
+            Allowed keys and values in each dictionary:
+                stopping_criterion: A string describing the stopping criterion 
+                    Allowed values: "max_depth", "min_samples_split"
+                stop_value: The value for which the stopping criteria will be evaulated against
+        split_criterion: name of method that will be used to evaluate the split
+            Allowed values: "sse"
+        max_features: Number of attributes to be considered for best split. If no value is supplied, the value will be equal to the number of attributes in the dataframe
     Returns:
         An instance of the class Node
     '''
-    if (evaluate_stopping_criterion(stop, df_length=len(df), current_depth=depth) == True): #Run if stoping criterion is unfullfilled
-        best_split_dict = splitting_measure(df, target) #Finds the optimal split
+    if (evaluate_stopping_criterion(stop, df_length=len(df), current_depth=depth) == True): 
+        best_split_dict = splitting_measure(df, target, split_criterion, max_features) #Finds the optimal split
         print(f"Split by: {best_split_dict}, depth: {depth} ") #TEMP FOR DEBUG
         #Creates an instance of the class node
         node = Node(
@@ -160,30 +172,33 @@ def build_tree(df, target, depth, stop):
         right_df = df[df[node.attribute] > node.split_value] #Values of the dataframe over the split value
 
         #Recursivly creates left and right nodes 
-        node.set_left(build_tree(left_df, target, (depth + 1), stop)) 
-        node.set_right(build_tree(right_df, target, (depth + 1), stop))
+        node.set_left(build_tree(left_df, target, (depth + 1), stop, split_criterion, max_features)) 
+        node.set_right(build_tree(right_df, target, (depth + 1), stop, split_criterion, max_features))
 
         return node
    
     
 
-def regression_tree(df, target, stop):
+def regression_tree(df, target, stop, split_criterion, max_features=None):
     '''
     Creates a decision tree
     Parameters: 
         df: A pandas DataFrame
         target: A column name in df that will be the class to be predicted
         stop: A list of dictionaries containing the stoping criterion.
-        Allowed values:
-            stopping_criterion: A string describing the stopping criterion 
-                Allowed values: "max_depth", "min_samples_split"
-            stop_value: The value for which the stopping criteria will be evaulated against
+            Allowed values:
+                stopping_criterion: A string describing the stopping criterion 
+                    Allowed values: "max_depth", "min_samples_split"
+                stop_value: The value for which the stopping criteria will be evaulated against
+        split_criterion: name of method that will be used to evaluate the split
+            Allowed values: "sse"
+        max_features: Number of attributes to be considered for best split. If no value is supplied, the value will be equal to the number of attributes in the dataframe
     '''
 
 
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
 
-    tree = build_tree(df_temp, target, 0, stop)
+    tree = build_tree(df_temp, target, 0, stop, split_criterion, max_features)
     print(tree)        
 
 
@@ -200,7 +215,7 @@ stop = [
     }
 ]
 
-regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop)
+regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
 
 
 
