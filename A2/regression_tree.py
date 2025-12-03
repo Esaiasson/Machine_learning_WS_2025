@@ -91,28 +91,56 @@ def std_dev(attribute):
 
     return standard_deviation
 
-def evaluate_stopping_criterion(stopping_criterion, stop_value, df_length, current_depth=None):
-    
-    if (df_length <= 1):
+def evaluate_stopping_criterion(stop, df_length, current_depth=None):
+    '''
+    Evaluates a given stopping criterion. Will always return False if df_length is < 1
+    Params:
+        stop: A list of dictionaries containing the stoping criterion.
+        df_length: Length of the dataframe
+        current_depth: Depth of the tree
+            Default: None
+    Returns:
+        True or False
+    '''
+
+    if (df_length < 1): #Always stop if the DataFrame contains less then 1 row
         return False
     else:
-        if stopping_criterion == "max_depth":
-            if(current_depth <= stop_value):
-                return True
-            else:
-                return False
-        elif stopping_criterion == "min_samples_split":
-            if(df_length >= stop_value):
-                return True
-            else:
-                return False
+        for stop_dict in stop:
+            if stop_dict["stopping_criterion"] == "max_depth":
+                if(current_depth <= stop_dict["stop_value"]):
+                    pass
+                else:
+                    return False
+            elif stop_dict["stopping_criterion"] == "min_samples_split":
+                if(df_length >= stop_dict["stop_value"]):
+                    pass
+                else:
+                    return False
+                
+        return True
         
 
 
-def build_tree(df, target, depth, stopping_criterion, stop_value):
-    if (evaluate_stopping_criterion(stopping_criterion, stop_value, df_length=len(df), current_depth=depth) == True):
-        best_split_dict = splitting_measure(df, target)
-        print(f"Split by: {best_split_dict}, depth: {depth} ")
+def build_tree(df, target, depth, stop):
+    '''
+    Creates linked instances of the class Node
+    Parameters:
+        df: A pandas DataFrame
+        target: A column name in df that will be the class to be predicted
+        depth: The current depth of the node 
+        stop: A list of dictionaries containing the stoping criterion.
+        Allowed keys and values in each dictionary:
+            stopping_criterion: A string describing the stopping criterion 
+                Allowed values: "max_depth", "min_samples_split"
+            stop_value: The value for which the stopping criteria will be evaulated against
+    Returns:
+        An instance of the class Node
+    '''
+    if (evaluate_stopping_criterion(stop, df_length=len(df), current_depth=depth) == True): #Run if stoping criterion is unfullfilled
+        best_split_dict = splitting_measure(df, target) #Finds the optimal split
+        print(f"Split by: {best_split_dict}, depth: {depth} ") #TEMP FOR DEBUG
+        #Creates an instance of the class node
         node = Node(
             best_split_dict.get("attribute"),
             best_split_dict.get("split_value"),
@@ -120,35 +148,51 @@ def build_tree(df, target, depth, stopping_criterion, stop_value):
             depth
         )
         
-        left_df = df[df[node.attribute] <= node.split_value]
-        right_df = df[df[node.attribute] > node.split_value]
+        left_df = df[df[node.attribute] <= node.split_value] #Values of the dataframe up to and including the split value
+        right_df = df[df[node.attribute] > node.split_value] #Values of the dataframe over the split value
 
-        node.set_left(build_tree(left_df, target, (depth + 1), stopping_criterion, stop_value)) 
-        node.set_right(build_tree(right_df, target, (depth + 1), stopping_criterion, stop_value))
+        #Recursivly creates left and right nodes 
+        node.set_left(build_tree(left_df, target, (depth + 1), stop)) 
+        node.set_right(build_tree(right_df, target, (depth + 1), stop))
 
         return node
    
     
 
-def regression_tree(df, target, stopping_criterion, stop_value):
+def regression_tree(df, target, stop):
     '''
     Creates a decision tree
     Parameters: 
         df: A pandas DataFrame
         target: A column name in df that will be the class to be predicted
-        stopping_criterion: A string describing the stopping criterion 
-            Allowed values: "max_depth", "min_samples_split"
-        stop_value: The value for which the stopping criteria will be evaulated against
+        stop: A list of dictionaries containing the stoping criterion.
+        Allowed values:
+            stopping_criterion: A string describing the stopping criterion 
+                Allowed values: "max_depth", "min_samples_split"
+            stop_value: The value for which the stopping criteria will be evaulated against
     '''
 
 
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
 
-    tree = build_tree(df_temp, target, 0, stopping_criterion, stop_value)
+    tree = build_tree(df_temp, target, 0, stop)
     print(tree)        
 
 
-regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", "min_samples_split", 500)
+
+#TEMP FOR DEBUG
+stop = [
+    {
+        "stopping_criterion": "max_depth",
+        "stop_value": 2
+    },
+    {
+        "stopping_criterion": "min_samples_split",
+        "stop_value": 500
+    }
+]
+
+regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop)
 
 
 
