@@ -1,5 +1,6 @@
 import pandas as pd
 import math
+from Node import Node
 
 
 food_waste = pd.read_csv("data/food_wastage_data.csv")
@@ -24,7 +25,7 @@ def sse(split_1, split_2):
     
     sse = (sse_split_1 + sse_split_2)
 
-    return sse    
+    return sse
     
 
 
@@ -36,29 +37,39 @@ def splitting_measure(df, target):
     Parameters:
         df: A pandas DataFrame 
         target: A name of a column in the df that acts as the target attribute 
+    Returns:
+        A dictionary of the best spliting criterion containing the following:
+            "attribute": The attribute to split
+            "split_value": The value to split the attribute by
+            "below_or_equal_predict": The mean of the target attribute in the split below or equal to the split value
+            "over_predict": The mean of the target attribute in the split over the split value
     '''
     
     attribute_sse = {} #Dictionary for keeping track of the best split for each attribute 
+    subset_mean = mean(df[target])
+
     for col in df.columns:
         if col != target: #Don't calculate SSE for the target column
             split_candidate = df[[col, target]] #Create a new dataframe with only one column and the target attribute
             split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True) #Sort the dataframe by the predictor attribute
             n = len(split_candidate_sorted) #number of rows 
             split_sse = {} #Dictionary for storing the sse for each split value
-            
             for i in range(0,n): #Itterate over all splot values
                 #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
-                split_sse[split_candidate_sorted.loc[i,col]] = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
-            
+                sse_value = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+                #Store the results of the SSE function and the split value as a dictionary
+                split_sse[sse_value] = {"split_value": split_candidate_sorted.loc[i,col]}
 
-            min_sse_split_value = min(split_sse, key=split_sse.get) #Gets the key of the item with the minimum SSE value
-            attribute_sse[split_sse.get(min_sse_split_value)] = {"attribute": col, "split_value": min_sse_split_value} #Stores the SSE as the key, with the split value and column namn for later comparison
-    
+            min_sse = min(split_sse) #The minimum key value, corresponding to the split with the lowest SSE value
+            min_sse_dict = split_sse.get(min_sse)
+            #Stores the SSE as the key, with the split value and attribute name
+            attribute_sse[min_sse] = {"attribute": col, "split_value": min_sse_dict.get("split_value")}
+
     best_split_sse =  min(attribute_sse) #The minimum SSE 
-    best_split = attribute_sse.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
-    split_by_attribute = best_split["attribute"] #Extracts the attribute name for the min SSE value
-    split_by_value = best_split["split_value"] #Extracts the split value that gave the min SSE
-    return split_by_attribute, split_by_value
+    best_split_dict = attribute_sse.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
+    best_split_dict["mean"] = subset_mean # adds 
+    
+    return best_split_dict
 
 
 
@@ -80,8 +91,24 @@ def std_dev(attribute):
 
     return standard_deviation
 
+def build_tree(df, target):
+    if len(df) > 500:
+        best_split_dict = splitting_measure(df, target)
+        print(f"Split by: {best_split_dict}")
+        node = Node(
+            best_split_dict.get("attribute"),
+            best_split_dict.get("split_value"),
+            best_split_dict.get("mean")
+        )
+        
+        left_df = df[df[node.attribute] <= node.split_value]
+        right_df = df[df[node.attribute] > node.split_value]
 
+        node.set_left(build_tree(left_df, target)) 
+        node.set_right(build_tree(right_df, target))
 
+        return node
+   
     
 
 def regression_tree(df, target):
@@ -90,10 +117,13 @@ def regression_tree(df, target):
     Parameters: 
         df: A pandas DataFrame
     '''
+
+
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
-    split_by_attribute, split_by_value = splitting_measure(df_temp, target)
-    print(f"Split by: {split_by_attribute}, at: {split_by_value}")
-        
+
+    tree = build_tree(df_temp, target)
+    print(tree)        
+
 
 regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount")
 
