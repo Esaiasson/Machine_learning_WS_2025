@@ -1,5 +1,6 @@
 import pandas as pd
 import math
+import random
 from Node import Node
 
 
@@ -31,12 +32,13 @@ def sse(split_1, split_2):
 
 
 
-def splitting_measure(df, target):
+def splitting_measure(df, target, max_features=None):
     '''
     Finds the values for different splitting measures per attribute in the dataframe
     Parameters:
         df: A pandas DataFrame 
         target: A name of a column in the df that acts as the target attribute 
+        max_features: Number of attributes to be considered for best split. If no value is supplied, the value will be equal to the number of attributes in the dataframe
     Returns:
         A dictionary of the best spliting criterion containing the following:
             "attribute": The attribute to split
@@ -46,9 +48,15 @@ def splitting_measure(df, target):
     '''
     
     attribute_sse = {} #Dictionary for keeping track of the best split for each attribute 
-    subset_mean = mean(df[target])
+    subset_mean = mean(df[target]) # Mean of target attribute in the dataframe
+    
+    predictor_attributes = df.loc[:, df.columns != target] #Dataframe without target attribute
+    if max_features == None: 
+        max_features = len(predictor_attributes.columns.tolist()) #If no max_features value is supplied, set it to the number of attributes in the dataframe
 
-    for col in df.columns:
+    selected_columns = random.sample(predictor_attributes.columns.tolist(), max_features) #Randomly select a subset of the dataframe, with the size of max_features
+
+    for col in selected_columns:
         if col != target: #Don't calculate SSE for the target column
             split_candidate = df[[col, target]] #Create a new dataframe with only one column and the target attribute
             split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True) #Sort the dataframe by the predictor attribute
