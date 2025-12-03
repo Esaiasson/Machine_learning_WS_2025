@@ -91,8 +91,26 @@ def std_dev(attribute):
 
     return standard_deviation
 
-def build_tree(df, target, depth):
-    if ((len(df) > 500) & (depth <= 2)): #DEBUG PURPOSE
+def evaluate_stopping_criterion(stopping_criterion, stop_value, df_length, current_depth=None):
+    
+    if (df_length <= 1):
+        return False
+    else:
+        if stopping_criterion == "max_depth":
+            if(current_depth <= stop_value):
+                return True
+            else:
+                return False
+        elif stopping_criterion == "min_samples_split":
+            if(df_length >= stop_value):
+                return True
+            else:
+                return False
+        
+
+
+def build_tree(df, target, depth, stopping_criterion, stop_value):
+    if (evaluate_stopping_criterion(stopping_criterion, stop_value, df_length=len(df), current_depth=depth) == True):
         best_split_dict = splitting_measure(df, target)
         print(f"Split by: {best_split_dict}, depth: {depth} ")
         node = Node(
@@ -105,28 +123,32 @@ def build_tree(df, target, depth):
         left_df = df[df[node.attribute] <= node.split_value]
         right_df = df[df[node.attribute] > node.split_value]
 
-        node.set_left(build_tree(left_df, target, (depth + 1))) 
-        node.set_right(build_tree(right_df, target, (depth + 1)))
+        node.set_left(build_tree(left_df, target, (depth + 1), stopping_criterion, stop_value)) 
+        node.set_right(build_tree(right_df, target, (depth + 1), stopping_criterion, stop_value))
 
         return node
    
     
 
-def regression_tree(df, target, stopping_criterion):
+def regression_tree(df, target, stopping_criterion, stop_value):
     '''
     Creates a decision tree
     Parameters: 
         df: A pandas DataFrame
+        target: A column name in df that will be the class to be predicted
+        stopping_criterion: A string describing the stopping criterion 
+            Allowed values: "max_depth", "min_samples_split"
+        stop_value: The value for which the stopping criteria will be evaulated against
     '''
 
 
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
 
-    tree = build_tree(df_temp, target, 0)
+    tree = build_tree(df_temp, target, 0, stopping_criterion, stop_value)
     print(tree)        
 
 
-regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount")
+regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", "min_samples_split", 500)
 
 
 
