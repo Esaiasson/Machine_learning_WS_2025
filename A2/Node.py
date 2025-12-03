@@ -1,8 +1,9 @@
 class Node: 
-    def __init__(self, attribute, split_value, mean):
+    def __init__(self, attribute, split_value, mean, depth):
         self.attribute = attribute
         self.split_value = split_value
         self.mean = mean
+        self.depth = depth
         self.left = None
         self.right = None
         

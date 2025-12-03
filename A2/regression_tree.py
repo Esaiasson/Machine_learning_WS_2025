@@ -57,17 +57,17 @@ def splitting_measure(df, target):
             for i in range(0,n): #Itterate over all splot values
                 #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
                 sse_value = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
-                #Store the results of the SSE function and the split value as a dictionary
-                split_sse[sse_value] = {"split_value": split_candidate_sorted.loc[i,col]}
+                #Store the results of the SSE function as a value belonging the key which is the split value
+                split_sse[split_candidate_sorted.loc[i,col]] = sse_value
 
-            min_sse = min(split_sse) #The minimum key value, corresponding to the split with the lowest SSE value
-            min_sse_dict = split_sse.get(min_sse)
+            min_sse_split_value = min(split_sse, key=split_sse.get) #The gets the key having the minimum value
+            min_sse = split_sse.get(min_sse_split_value)
             #Stores the SSE as the key, with the split value and attribute name
-            attribute_sse[min_sse] = {"attribute": col, "split_value": min_sse_dict.get("split_value")}
+            attribute_sse[min_sse] = {"attribute": col, "split_value": min_sse_split_value}
 
     best_split_sse =  min(attribute_sse) #The minimum SSE 
     best_split_dict = attribute_sse.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
-    best_split_dict["mean"] = subset_mean # adds 
+    best_split_dict["mean"] = subset_mean # adds the mean of the y-values in the whole subset, which will be used for prediction
     
     return best_split_dict
 
@@ -91,27 +91,28 @@ def std_dev(attribute):
 
     return standard_deviation
 
-def build_tree(df, target):
-    if len(df) > 500:
+def build_tree(df, target, depth):
+    if ((len(df) > 500) & (depth <= 2)): #DEBUG PURPOSE
         best_split_dict = splitting_measure(df, target)
-        print(f"Split by: {best_split_dict}")
+        print(f"Split by: {best_split_dict}, depth: {depth} ")
         node = Node(
             best_split_dict.get("attribute"),
             best_split_dict.get("split_value"),
-            best_split_dict.get("mean")
+            best_split_dict.get("mean"),
+            depth
         )
         
         left_df = df[df[node.attribute] <= node.split_value]
         right_df = df[df[node.attribute] > node.split_value]
 
-        node.set_left(build_tree(left_df, target)) 
-        node.set_right(build_tree(right_df, target))
+        node.set_left(build_tree(left_df, target, (depth + 1))) 
+        node.set_right(build_tree(right_df, target, (depth + 1)))
 
         return node
    
     
 
-def regression_tree(df, target):
+def regression_tree(df, target, stopping_criterion):
     '''
     Creates a decision tree
     Parameters: 
@@ -121,7 +122,7 @@ def regression_tree(df, target):
 
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
 
-    tree = build_tree(df_temp, target)
+    tree = build_tree(df_temp, target, 0)
     print(tree)        
 
 
