@@ -9,14 +9,15 @@ def rmse(target, predictions):
         target: The predictions, can be a pandas series, dataframe or an array 
 
     '''
+
+    if len(target) != len(predictions):
+        raise Exception("Length of target and predictions does not match") 
     if isinstance(target, (pd.Series, pd.DataFrame)) == False:
         target = pd.Series(target)
     if isinstance(predictions, (pd.Series, pd.DataFrame)) == False:
-        predictions = pd.Series(predictions)
-
-    eval_df = pd.concat([target, predictions], axis=1)
-    eval_df.columns = ["target", "prediction"]
-    total_error = (sum((eval_df["target"] - eval_df["prediction"])**2))
-    rmse_score = math.sqrt((total_error/(len(eval_df))))
+        predictions = pd.Series(predictions, index=target.index)
+    
+    total_error = (sum((target - predictions)**2))
+    rmse_score = math.sqrt((total_error/(len(target))))
 
     return rmse_score

@@ -1,9 +1,14 @@
 import pandas as pd
+import sys
 import regression_tree as rt
 import prediction_evaluation as eval
+sys.path.append("preprocessing")
+import preprocessing_food_wastage as pre_food_wastage
 
 
-food_waste = pd.read_csv("data/food_wastage_data.csv")
+
+food_waste_df_train, food_waste_df_test = pre_food_wastage.preprocessing_food_wastage()
+
 
 #TEMP FOR DEBUG
 stop = [
@@ -17,6 +22,10 @@ stop = [
     }
 ]
 
-tree = rt.regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
-predictions = rt.predict_from_tree(tree, food_waste[["Quantity of Food", "Number of Guests"]])
-rmse = eval.rmse(food_waste[["Wastage Food Amount"]], predictions)
+print("TREE STARTED")
+tree = rt.regression_tree(food_waste_df_train, "wastage_food_amount", stop, split_criterion="sse")
+predictions = rt.predict_from_tree(tree, food_waste_df_test)
+print("PREDICTIONS CREATED")
+rmse = eval.rmse(food_waste_df_test["wastage_food_amount"], predictions)
+print(rmse)
+

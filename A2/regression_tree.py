@@ -192,10 +192,7 @@ def regression_tree(df, target, stop, split_criterion, max_features=None):
         max_features: Number of attributes to be considered for best split. If no value is supplied, the value will be equal to the number of attributes in the dataframe
     '''
 
-
-    df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
-
-    tree = build_tree(df_temp, target, 0, stop, split_criterion, max_features)
+    tree = build_tree(df, target, 0, stop, split_criterion, max_features)
     return tree
 
 
@@ -221,25 +218,9 @@ def predict_from_tree(tree, df):
     
     return predicitons
         
-            
+        
 
 
-
-#TEMP FOR DEBUG
-stop = [
-    {
-        "stopping_criterion": "max_depth",
-        "stop_value": 2
-    },
-    {
-        "stopping_criterion": "min_samples_split",
-        "stop_value": 500
-    }
-]
-
-#tree = regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
-#predictions = predict_from_tree(tree, food_waste[["Quantity of Food", "Number of Guests"]])
-#print(predictions)
 
 
 
