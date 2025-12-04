@@ -4,9 +4,6 @@ import random
 from Node import Node
 
 
-food_waste = pd.read_csv("data/food_wastage_data.csv")
-
-
 def mean(series):
     '''
     Calculates the mean of a series
@@ -199,7 +196,6 @@ def regression_tree(df, target, stop, split_criterion, max_features=None):
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
 
     tree = build_tree(df_temp, target, 0, stop, split_criterion, max_features)
-    print(tree)    
     return tree
 
 
@@ -221,7 +217,6 @@ def predict_from_tree(tree, df):
     predicitons = []
     for row in df.index:
         pred = find_leaf_node(tree, df.loc[row])
-        print(pred)
         predicitons.append(pred)
     
     return predicitons
@@ -242,9 +237,9 @@ stop = [
     }
 ]
 
-tree = regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
-predictions = predict_from_tree(tree, food_waste[["Quantity of Food", "Number of Guests"]])
-print(predictions)
+#tree = regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
+#predictions = predict_from_tree(tree, food_waste[["Quantity of Food", "Number of Guests"]])
+#print(predictions)
 
 
 

@@ -19,5 +19,4 @@ stop = [
 
 tree = rt.regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
 predictions = rt.predict_from_tree(tree, food_waste[["Quantity of Food", "Number of Guests"]])
-
-print(predictions)
+rmse = eval.rmse(food_waste[["Wastage Food Amount"]], predictions)
