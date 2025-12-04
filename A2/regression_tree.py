@@ -199,7 +199,34 @@ def regression_tree(df, target, stop, split_criterion, max_features=None):
     df_temp = df.apply(pd.to_numeric) #TEMPORARY FOR DEBUGGING
 
     tree = build_tree(df_temp, target, 0, stop, split_criterion, max_features)
-    print(tree)        
+    print(tree)    
+    return tree
+
+
+def find_leaf_node(node, row):
+    if row[node.attribute] <= node.split_value:
+        if node.left != None:
+            return find_leaf_node(node.left, row)
+        elif node.left == None:
+            return node.mean
+    if row[node.attribute] > node.split_value:
+        if node.right != None:
+            return find_leaf_node(node.right, row)
+        elif node.right == None:
+            return node.mean
+
+
+
+def predict_from_tree(tree, df):
+    predicitons = []
+    for row in df.index:
+        pred = find_leaf_node(tree, df.loc[row])
+        print(pred)
+        predicitons.append(pred)
+    
+    return predicitons
+        
+            
 
 
 
@@ -215,8 +242,9 @@ stop = [
     }
 ]
 
-regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
-
+tree = regression_tree(food_waste[["Quantity of Food", "Number of Guests", "Wastage Food Amount"]], "Wastage Food Amount", stop, split_criterion="sse")
+predictions = predict_from_tree(tree, food_waste[["Quantity of Food", "Number of Guests"]])
+print(predictions)
 
 
 
