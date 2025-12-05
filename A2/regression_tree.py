@@ -35,6 +35,45 @@ def sse(split_1, split_2):
 
     return sse
 
+def mse(split_1, split_2):
+    '''
+    MSE splitting criterion
+    '''
+    mean_split_1 = mean(split_1)
+    mean_split_2 = mean(split_2) 
+    
+    for y in split_1: 
+        mse_split_1 += ((y-mean_split_1)**2)/split_1.sum()
+    for y in split_2: 
+        mse_split_2 += ((y-mean_split_2)**2)/split_2.sum()
+    
+    mse = (mse_split_1+mse_split_2)
+
+    return mse
+
+
+def mae(split_1, split_2):
+    '''
+    MAE splitting criterion
+    '''
+    mean_split_1 = mean(split_1)
+    mean_split_2 = mean(split_2) 
+    
+    for y in split_1: 
+        mae_split_1 += abs(y-mean_split_1)/split_1.sum()
+    for y in split_2: 
+        mae_split_2 += abs(y-mean_split_2)/split_2.sum()
+    
+    mae = (mae_split_1+mae_split_2)
+
+    return mae
+
+def friedman_mse():
+    '''
+    Friedman MSE splitting criterion
+    '''
+    pass
+
 
 def splitting_measure(df, target, split_criterion, max_features=None):
     '''
@@ -53,7 +92,7 @@ def splitting_measure(df, target, split_criterion, max_features=None):
             "over_predict": The mean of the target attribute in the split over the split value
     '''
     
-    attribute_sse = {} #Dictionary for keeping track of the best split for each attribute 
+    attribute_split_impurity = {} #Dictionary for keeping track of the best split for each attribute 
     subset_mean = mean(df[target]) # Mean of target attribute in the dataframe
     
     predictor_attributes = df.loc[:, df.columns != target] #Dataframe without target attribute
@@ -78,10 +117,10 @@ def splitting_measure(df, target, split_criterion, max_features=None):
             min_score_split_value = min(split_scores, key=split_scores.get) #Gets the key having the minimum value
             min_score = split_scores.get(min_score_split_value)
             #Stores the SSE as the key, with the split value and attribute name
-            attribute_sse[min_score] = {"attribute": col, "split_value": min_score_split_value}
+            attribute_split_impurity[min_score] = {"attribute": col, "split_value": min_score_split_value}
 
-    best_split_sse =  min(attribute_sse) #The minimum SSE 
-    best_split_dict = attribute_sse.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
+    best_split_sse =  min(attribute_split_impurity) #The minimum SSE 
+    best_split_dict = attribute_split_impurity.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
     best_split_dict["mean"] = subset_mean # adds the mean of the y-values in the whole subset, which will be used for prediction
     
     return best_split_dict
