@@ -118,22 +118,22 @@ def evaluate_stopping_criterion(stop, df_length, current_depth=None):
         True or False
     '''
 
+
     if (df_length < 1): #Always stop if the DataFrame contains less then 1 row
         return False
     else:
-        for stop_dict in stop:
-            if stop_dict["stopping_criterion"] == "max_depth":
-                if(current_depth <= stop_dict["stop_value"]):
-                    pass
-                else:
-                    return False
-            elif stop_dict["stopping_criterion"] == "min_samples_split":
-                if(df_length >= stop_dict["stop_value"]):
-                    pass
-                else:
-                    return False
-                
-        return True
+        if "max_depth" in stop:
+            if(current_depth <= stop["max_depth"]):
+                pass
+            else:
+                return False
+        if "min_samples_split" in stop:
+            if(df_length >= stop["min_samples_split"]):
+                pass
+            else:
+                return False
+            
+    return True
 
 
 def build_tree(df, target, depth, stop, split_criterion, max_features):
@@ -156,7 +156,6 @@ def build_tree(df, target, depth, stop, split_criterion, max_features):
     '''
     if (evaluate_stopping_criterion(stop, df_length=len(df), current_depth=depth) == True): 
         best_split_dict = splitting_measure(df, target, split_criterion, max_features) #Finds the optimal split
-        print(f"Split by: {best_split_dict}, depth: {depth} ") #TEMP FOR DEBUG
         #Creates an instance of the class node
         node = Node(
             best_split_dict.get("attribute"),
