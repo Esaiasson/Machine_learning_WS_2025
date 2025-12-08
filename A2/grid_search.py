@@ -1,20 +1,29 @@
-import sys
 import pandas as pd
 import time
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import make_scorer
 import prediction_evaluation as eval
 import itertools
-#import regression_tree as rt
 
 
 
 def grid_search_cv(df, target, model, pred_function, param_grid):
+    '''
+    Function to perform grid search of a set of hyperparameters with cross validation
+    Parameters:
+        df: Dataframe to train and evalute on 
+        target: Attribute in the dataframe that is the target
+        model: A regression model
+        pred_function: The method to make predictions
+        param_grid: A dictionary of parameters to test
+    '''
     
     #BORROWED FROM: https://stackoverflow.com/questions/38721847/how-to-generate-all-combination-from-values-in-dict-of-lists-in-python
     keys, values = zip(*param_grid.items())
     combinations_list = [dict(zip(keys, v)) for v in itertools.product(*values)]
             
-    kf = KFold(n_splits=2, shuffle=True)
+    kf = KFold(n_splits=5, shuffle=True)
 
     scores = []    
     results = []
@@ -36,12 +45,45 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
         results.append({"runtime": end - start, "mean_score": mean_score, "Parameters": combo})
         
     results_df = pd.DataFrame.from_dict(results)
-    sorted_results_df = results_df.sort_values("mean_score", ignore_index=True)
-    best_model = model(df, target, sorted_results_df.loc[0,"Parameters"], split_criterion="sse")
-    return best_model, results_df.loc[:5,]
+    sorted_results_df = results_df.sort_values("mean_score", ignore_index=True, ascending=True)
+    best_model = model(df, target, sorted_results_df.loc[0,"Parameters"], split_criterion=sorted_results_df.loc[0,"Parameters"]["split_criterion"])
+    return best_model, sorted_results_df.loc[:5,]
+
+
+
+
+def grid_search_scikit(df, target_attribute, param_grid):
+
+  x = df.loc[:, df.columns != target_attribute]
+  y = df[target_attribute]
+
+  start = time.perf_counter()
+
+  tree = DecisionTreeRegressor(random_state=1)
+
+  cv_strategy = KFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=1
+  )
+
+  grid_search = GridSearchCV(
+      estimator=tree,
+      param_grid=param_grid,
+      cv=cv_strategy,
+      scoring=make_scorer(eval.rmse, greater_is_better=False),
+      refit=True,
+      verbose=True
+  )
+
+  grid_search.fit(x,y)
+
+  results = pd.DataFrame(grid_search.cv_results_)
+  results["mean_test_score"] = abs(results["mean_test_score"])
+  results_orderd = results.sort_values("mean_test_score", ignore_index=True, ascending=True)
+  elapsed = time.perf_counter() - start
+  results_orderd["runtime"] = elapsed
+  print(grid_search.best_estimator_)
+  print("Time(s): ", elapsed)
+  return results_orderd.loc[:5,["runtime", "mean_test_score", "params"]], grid_search.best_estimator_
    
-
-
-
-#food_waste_df_train, food_waste_df_test = pre_food_wastage.preprocessing_food_wastage()
-#grid_search_new(food_waste_df_train, "wastage_food_amount", rt.regression_tree, rt.predict_from_tree, param_grid)
