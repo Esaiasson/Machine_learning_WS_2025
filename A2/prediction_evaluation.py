@@ -21,3 +21,8 @@ def rmse(target, predictions):
     rmse_score = math.sqrt((total_error/(len(target))))
 
     return rmse_score
+
+
+def cross_validation_score(scores):
+    mean_score = sum(scores)/len(scores)
+    return mean_score
