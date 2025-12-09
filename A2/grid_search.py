@@ -4,9 +4,14 @@ from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import make_scorer
 import prediction_evaluation as eval
+import random_forest as rf
 import itertools
 
-
+def grid_combinations(param_grid):
+    #BORROWED FROM: https://stackoverflow.com/questions/38721847/how-to-generate-all-combination-from-values-in-dict-of-lists-in-python
+    keys, values = zip(*param_grid.items())
+    combinations_list = [dict(zip(keys, v)) for v in itertools.product(*values)]
+    return combinations_list
 
 def grid_search_cv(df, target, model, pred_function, param_grid):
     '''
@@ -19,9 +24,7 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
         param_grid: A dictionary of parameters to test
     '''
     
-    #BORROWED FROM: https://stackoverflow.com/questions/38721847/how-to-generate-all-combination-from-values-in-dict-of-lists-in-python
-    keys, values = zip(*param_grid.items())
-    combinations_list = [dict(zip(keys, v)) for v in itertools.product(*values)]
+    combinations_list = grid_combinations(param_grid)
             
     kf = KFold(n_splits=5, shuffle=True)
 
@@ -87,3 +90,39 @@ def grid_search_scikit(df, target_attribute, param_grid):
   print("Time(s): ", elapsed)
   return results_orderd.loc[:5,["runtime", "mean_test_score", "params"]], grid_search.best_estimator_
    
+
+
+def grid_search_obb(df, target_attribute, param_grid):
+    
+    results = []
+    forests = []
+
+    combinations_list = grid_combinations(param_grid)
+
+    for i, combo in enumerate(combinations_list):
+        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
+        start = time.perf_counter()
+        forest = rf.populate_forest(
+            df,
+            target_attribute,
+            combo,
+            split_criterion=combo["split_criterion"],
+            no_of_estimators=combo["no_of_estimators"],
+            max_features_criterion=combo["max_features_criterion"]
+        )
+        predictions = rf.eval_oob(forest, df, target_attribute)
+        pred_and_target = df[target_attribute].to_frame().join(predictions.to_frame(), how='outer')
+        pred_and_target = pred_and_target.dropna()
+        score = eval.rmse(pred_and_target[target_attribute], pred_and_target["prediction"])
+        end = time.perf_counter()
+
+        forests.append(forest)
+        results.append({"runtime": end - start, "mean_score": score, "Parameters": combo, "index": i})
+
+    results_df = pd.DataFrame.from_dict(results)
+    sorted_results_df = results_df.sort_values("mean_score", ignore_index=True, ascending=True)
+    best_model = forests[sorted_results_df.loc[0, "index"]]
+    return best_model, sorted_results_df.loc[:5,].drop(labels="index", axis=1)
+
+    
+        

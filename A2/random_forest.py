@@ -84,7 +84,7 @@ def eval_oob(forest, df, target):
         tree_preds = tree_preds.join(pred_series, how='outer')
         del tree_preds[tree_preds.columns[0]]
         forest_preds = trees_mean(tree_preds)
-    print(forest_preds)
+
     return forest_preds
     
 
