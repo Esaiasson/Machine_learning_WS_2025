@@ -10,8 +10,9 @@ def rmse(actual, predicted):
         target: The predictions, can be a pandas series, dataframe or an array 
     '''
     n = len(actual)
-    total_error = (sum((actual - predicted)**2))
+    total_error = sum((actual - predicted)**2)
     rmse_score = math.sqrt((total_error/n))
+
     return rmse_score
 
 def mse(actual, predicted):
@@ -53,7 +54,7 @@ def measure_predictions(target, predictions, measure):
         target = pd.Series(target)
     if isinstance(predictions, (pd.Series, pd.DataFrame)) == False:
         predictions = pd.Series(predictions, index=target.index)
-    
+
     if measure == 'rmse':
         score = rmse(target, predictions)
     elif measure == 'rmse':

@@ -28,12 +28,13 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
             
     kf = KFold(n_splits=5, shuffle=True)
 
-    scores = []    
     results = []
 
     for i, combo in enumerate(combinations_list):
         print(f"Running combo: {i+1}")
         start = time.perf_counter()
+        scores = []    
+
         for train_index, test_index in kf.split(df):
             df_train_index = df.index[train_index]
             df_test_index = df.index[test_index]

@@ -93,6 +93,7 @@ def predict_from_forest(df, forest):
     predict on unseen data
     '''
     tree_preds = pd.DataFrame()
+    tree_preds.index = df.index
     
     for tree_id in forest.keys():     
         tree = forest[tree_id]['estimator']
