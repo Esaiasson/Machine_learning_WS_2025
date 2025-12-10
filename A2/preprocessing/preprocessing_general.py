@@ -38,3 +38,11 @@ def train_test_split(df):
     test_df = df.drop(train_df.index)
     
     return train_df, test_df
+
+def drop_cols(df, indices=None):
+    if indices is None:
+        indices = []
+    cols = df.columns[indices]
+    df.drop(columns=cols, inplace=True)
+
+    return df
