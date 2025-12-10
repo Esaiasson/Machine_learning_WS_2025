@@ -36,7 +36,8 @@ def apply_processing(df, states_map):
     df = pre.map_attribute(df, "State", states_map)
 
     df = non_rank_handling(df)
-    
+    df = pre.rename_columns(df)
+
     return df
 
 
@@ -44,11 +45,15 @@ def preprocessing_college_ranking():
 
     df = pd.read_csv("data/US-News-Rankings-Universities-Through-2023.csv")
     states_map = states_mapping(df)
+    print("Dataset University Ranking")
+    pre.df_info(df, "2023", "full")
     df_train, df_test = pre.train_test_split(df)
+    pre.df_info(df_train, "2023", "train")
+    pre.df_info(df_test, "2023", "test")
     
+
     df_train_processed = apply_processing(df_train, states_map)
     df_test_processed = apply_processing(df_test, states_map)
-    #pre.df_info(df_train_processed)
 
     
     return df_train_processed, df_test_processed

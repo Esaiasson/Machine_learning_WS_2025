@@ -1,10 +1,21 @@
 import pandas as pd
 import re
+import matplotlib.pyplot as plt
 
 
-def df_info(df):
-    print(df.dtypes)
+def df_info(df, target, split):
+    print(f"The {split} dataframe consists of {df.shape[0]} rows, and {df.shape[1]} attributes")
+    if split == "full":
+        na_rows = df.isnull().any(axis=1).sum()
+        print(f"Rows containing NA values before preprocessing: {na_rows}")    
+
+    plt.figure(figsize=(8, 6))
+    plt.hist(df[target], bins=10)
+    plt.title(f'Distribution of target attribute in {split} dataset: {target}')
+    plt.tight_layout()
+    plt.show()
     
+
 
 def one_hot_encode(df, columns_for_ohe):
     return pd.get_dummies(df, columns=columns_for_ohe).replace({True: 1, False: 0})

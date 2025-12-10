@@ -211,7 +211,8 @@ def build_tree(df, target, depth, stop, split_criterion, max_features):
         node.set_right(build_tree(right_df, target, (depth + 1), stop, split_criterion, max_features))
 
         return node
-   
+    else:
+        return None
     
 
 def regression_tree(df, target, stop, split_criterion, max_features=None):
