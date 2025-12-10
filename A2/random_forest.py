@@ -86,11 +86,21 @@ def eval_oob(forest, df, target):
         forest_preds = trees_mean(tree_preds)
 
     return forest_preds
-    
 
-def predict_from_forest():
+
+def predict_from_forest(df, forest):
     '''
     predict on unseen data
     '''
-    pass
+    tree_preds = pd.DataFrame()
+    
+    for tree_id in forest.keys():     
+        tree = forest[tree_id]['estimator']
 
+        pred = regression_tree.predict_from_tree(tree, df)
+        name = f'pred_{tree_id}'
+    
+        tree_preds[name] = pred
+        forest_test_preds = trees_mean(tree_preds)
+    
+    return forest_test_preds
