@@ -31,7 +31,7 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
     results = []
 
     for i, combo in enumerate(combinations_list):
-        print(f"Running combo: {i+1}")
+        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
         start = time.perf_counter()
         scores = []    
 
@@ -51,7 +51,7 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
     results_df = pd.DataFrame.from_dict(results)
     sorted_results_df = results_df.sort_values("mean_score", ignore_index=True, ascending=True)
     best_model = model(df, target, sorted_results_df.loc[0,"Parameters"], split_criterion=sorted_results_df.loc[0,"Parameters"]["split_criterion"])
-    return best_model, sorted_results_df.loc[:5,]
+    return best_model, sorted_results_df
 
 
 

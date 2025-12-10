@@ -29,9 +29,28 @@ def sse(split_1, split_2):
     for y in split_1: 
         sse_split_1 += (y-mean_split_1)**2
     for y in split_2: 
-        sse_split_1 += (y-mean_split_2)**2
+        sse_split_2 += (y-mean_split_2)**2
     
     sse = (sse_split_1 + sse_split_2)
+
+    return sse
+
+
+def sse2(split_1, split_2):
+    '''
+    Calculates the SSE of two series
+    Parameters:
+        split_1: A pandas series
+        split_2: A pandas series
+    '''
+    
+    mean_split_1 = split_1.mean()
+    mean_split_2 = split_2.mean() 
+
+    sse_split_1 = ((split_1 - mean_split_1)**2).sum()
+    sse_split_2 = ((split_2 - mean_split_2)**2).sum()
+    
+    sse = sse_split_1 + sse_split_2
 
     return sse
 
@@ -110,7 +129,7 @@ def splitting_measure(df, target, split_criterion, max_features=None):
             for i in range(0,n): #Itterate over all split values
                 if split_criterion == "sse":
                     #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
-                    score = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+                    score = sse2(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
                 #Store the results of the evaluation function as a value belonging the key which is the split value
                 split_scores[split_candidate_sorted.loc[i,col]] = score
 
