@@ -2,6 +2,7 @@ import pandas as pd
 import math
 import random
 from Node import Node
+import numpy as np
 
 
 def mean(series):
@@ -50,20 +51,11 @@ def mse(split_1, split_2):
     return mse
 
 
-def mae(split_1, split_2):
+def mae():
     '''
     MAE splitting criterion
     '''
-    mean_split_1 = split_1.mean()
-    mean_split_2 = split_2.mean() 
-
-
-    mae_split_1 = ((abs(split_1 - mean_split_1)).sum())/len(split_1)
-    mae_split_2 = ((abs(split_2 - mean_split_2)).sum())/len(split_2)
-    
-    mae = mae_split_1 + mae_split_2
-
-    return mae
+    pass
 
 def friedman_mse():
     '''
@@ -110,8 +102,6 @@ def splitting_measure(df, target, split_criterion, max_features=None):
                     score = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
                 elif split_criterion == "mse":
                     score = mse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
-                elif split_criterion == "mae":
-                    score = mae(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
 
                 #Store the results of the evaluation function as a value belonging the key which is the split value
                 split_scores[split_candidate_sorted.loc[i,col]] = score
@@ -126,6 +116,91 @@ def splitting_measure(df, target, split_criterion, max_features=None):
     best_split_dict["mean"] = subset_mean # adds the mean of the y-values in the whole subset, which will be used for prediction
     
     return best_split_dict
+
+def splitting_measure_delta(df, target, split_criterion, max_features=None):
+    '''
+    Finds the values for different splitting measures per attribute in the dataframe
+    Parameters:
+        df: A pandas DataFrame 
+        target: A name of a column in the df that acts as the target attribute 
+        split_criterion: name of method that will be used to evaluate the split
+            Allowed values: "sse"
+        max_features: Number of attributes to be considered for best split. If no value is supplied, the value will be equal to the number of attributes in the dataframe
+    Returns:
+        A dictionary of the best spliting criterion containing the following:
+            "attribute": The attribute to split
+            "split_value": The value to split the attribute by
+            "below_or_equal_predict": The mean of the target attribute in the split below or equal to the split value
+            "over_predict": The mean of the target attribute in the split over the split value
+    '''
+    
+    attribute_split_impurity = {} #Dictionary for keeping track of the best split for each attribute 
+    subset_mean = mean(df[target]) # Mean of target attribute in the dataframe
+    
+    predictor_attributes = df.loc[:, df.columns != target] #Dataframe without target attribute
+    if max_features == None: 
+        max_features = len(predictor_attributes.columns.tolist()) #If no max_features value is supplied, set it to the number of attributes in the dataframe
+
+    selected_columns = random.sample(predictor_attributes.columns.tolist(), max_features) #Randomly select a subset of the dataframe, with the size of max_features
+
+    for col in selected_columns:
+        split_candidate = df[[col, target]] #Create a new dataframe with only one column and the target attribute
+        split_candidate_sorted = split_candidate.sort_values(col,ignore_index=True) #Sort the dataframe by the predictor attribute
+        y = split_candidate_sorted[target].values
+        x = split_candidate_sorted[col].values
+        n = len(y) #number of rows 
+
+        count_left = 0
+        sum_left = 0
+        sum_sq_left = 0
+        
+        count_right = n
+        sum_right = y.sum()
+        sum_sq_right = np.dot(y, y)
+
+        # initiailze the best_score and split tracker
+        # best_score = float("inf")
+        # best_split_value = None
+
+        split_scores = {} #Dictionary for storing the sse for each split value
+        for i in range(0,n): #Itterate over all split values
+            value = y[i]
+
+            count_left += 1
+            sum_left += value
+            sum_sq_left += value*value
+            
+            count_right -= 1
+            sum_right -= value
+            sum_sq_right -= value*value
+
+            if count_right==0 or count_left==0:
+                continue
+            
+            if split_criterion == 'sse':
+                measure_on_left = sum_sq_left - ((sum_left*sum_left)/count_left)
+                measure_on_right = sum_sq_right - ((sum_right*sum_right)/count_right)
+            
+            elif split_criterion == 'mse':
+                measure_on_left = (sum_sq_left - (sum_left*sum_left)/count_left)/count_left
+                measure_on_right = (sum_sq_right - (sum_right*sum_right)/count_right)/count_right
+                        
+            score = measure_on_left + measure_on_right
+
+            #Store the results of the evaluation function as a value belonging the key which is the split value
+            split_scores[split_candidate_sorted.loc[i,col]] = score
+
+        min_score_split_value = min(split_scores, key=split_scores.get) #Gets the key having the minimum value
+        min_score = split_scores.get(min_score_split_value)
+        #Stores the SSE as the key, with the split value and attribute name
+        attribute_split_impurity[min_score] = {"attribute": col, "split_value": min_score_split_value}
+
+    best_split_sse =  min(attribute_split_impurity) #The minimum SSE 
+    best_split_dict = attribute_split_impurity.get(best_split_sse) #Gets the nested dictionary corresponding to the min SSE value
+    best_split_dict["mean"] = subset_mean # adds the mean of the y-values in the whole subset, which will be used for prediction
+    
+    return best_split_dict
+
 
 
 
@@ -196,7 +271,7 @@ def build_tree(df, target, depth, stop, split_criterion, max_features):
         An instance of the class Node
     '''
     if (evaluate_stopping_criterion(stop, df_length=len(df), current_depth=depth) == True): 
-        best_split_dict = splitting_measure(df, target, split_criterion, max_features) #Finds the optimal split
+        best_split_dict = splitting_measure_delta(df, target, split_criterion, max_features) #Finds the optimal split
         #Creates an instance of the class node
         node = Node(
             best_split_dict.get("attribute"),
