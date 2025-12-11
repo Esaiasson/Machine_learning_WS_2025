@@ -6,7 +6,6 @@ def plot_parameter(train_results_food_waste, train_results_college_rank, param_g
     df_college_rank = train_results_college_rank.join(train_results_college_rank['Parameters'].apply(pd.Series))    
   
     
-    #print(df_food_waste)
     for param in param_grid.keys():
 
         df_static_food_waste = df_food_waste.copy()
@@ -21,12 +20,24 @@ def plot_parameter(train_results_food_waste, train_results_college_rank, param_g
         df_static_college_rank = df_static_college_rank.sort_values(by=param)        
 
 
-        print(param)
-        print(df_static_food_waste[[param, "runtime"]])
-        plt.figure(figsize=(8, 6))
-        plt.plot(df_static_food_waste[param], df_static_food_waste["runtime"])
-        plt.plot(df_static_college_rank[param], df_static_college_rank["runtime"])
-        plt.xlabel(f"{param}")
-        plt.ylabel("Runtime")
+        print(df_static_food_waste)
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+        fig.suptitle(f"{param}")
+
+        #Runtime plot
+        ax1.plot(df_static_food_waste[param], df_static_food_waste["runtime"])
+        ax1.plot(df_static_college_rank[param], df_static_college_rank["runtime"])
+        ax1.set_xlabel(f"{param}")
+        ax1.set_ylabel("Runtime")
+        ax1.set_xticks(range(int(df_static_food_waste[param].min()), int(df_static_food_waste[param].max()) + 1))
+        
+        #Performance metric plot
+        ax2.plot(df_static_food_waste[param], df_static_food_waste["mean_score"])
+        ax2.plot(df_static_college_rank[param], df_static_college_rank["mean_score"])
+        ax2.set_xlabel(f"{param}")
+        ax2.set_ylabel("Score")
+        ax2.set_xticks(range(int(df_static_food_waste[param].min()), int(df_static_food_waste[param].max()) + 1))
+        
+
         plt.tight_layout()
         plt.show()
