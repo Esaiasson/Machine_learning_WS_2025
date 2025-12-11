@@ -1,5 +1,6 @@
 import pandas as pd
 import time
+from joblib import Parallel, delayed
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import make_scorer
@@ -12,6 +13,62 @@ def grid_combinations(param_grid):
     keys, values = zip(*param_grid.items())
     combinations_list = [dict(zip(keys, v)) for v in itertools.product(*values)]
     return combinations_list
+
+
+def evaluate_combo(combo, df, target, model, pred_function, kf):
+    start = time.perf_counter()
+    rmse_scores = []
+    mae_scores = []    
+
+    for train_index, test_index in kf.split(df):
+        df_train_index = df.index[train_index]
+        df_test_index = df.index[test_index]
+        created_model = model(df.loc[df_train_index, ], target, combo, split_criterion=combo["split_criterion"])
+        predictions = pred_function(created_model, df.loc[df_test_index, ])
+        rmse, mae = eval.measure_predictions(df.loc[df_test_index, target], predictions)
+        rmse_scores.append(rmse)
+        mae_scores.append(mae)
+        
+    end = time.perf_counter()
+    mean_rmse = eval.cross_validation_score(rmse_scores)
+    mean_mae = eval.cross_validation_score(mae_scores)
+    
+
+    return {
+        "runtime": end - start,
+        "mean_rmse": mean_rmse,
+        "mean_mae": mean_mae,
+        "Parameters": combo
+    }
+    
+def grid_search_cv2(df, target, model, pred_function, param_grid):
+    '''
+    Function to perform grid search of a set of hyperparameters with cross validation
+    Parameters:
+        df: Dataframe to train and evalute on 
+        target: Attribute in the dataframe that is the target
+        model: A regression model
+        pred_function: The method to make predictions
+        param_grid: A dictionary of parameters to test
+    '''
+    
+    combinations_list = grid_combinations(param_grid)
+            
+    kf = KFold(n_splits=5, shuffle=True)
+
+    results = Parallel(n_jobs=-1, verbose=5)(
+        delayed(evaluate_combo)(combo, df, target, model, pred_function, kf)
+        for combo in combinations_list
+    )
+
+    results_df = pd.DataFrame(results)
+    sorted_results_df = results_df.sort_values("mean_rmse", ignore_index=True, ascending=True)
+    best_model = model(df, target, sorted_results_df.loc[0,"Parameters"], split_criterion=sorted_results_df.loc[0,"Parameters"]["split_criterion"])
+    return best_model, sorted_results_df
+
+
+
+
 
 def grid_search_cv(df, target, model, pred_function, param_grid):
     '''
