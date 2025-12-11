@@ -13,30 +13,8 @@ def mean(series):
     n = series.size # Number of rows in the series
     return series.sum()/n
 
+
 def sse(split_1, split_2):
-    '''
-    Calculates the SSE of two series
-    Parameters:
-        split_1: A pandas series
-        split_2: A pandas series
-    '''
-    
-    mean_split_1 = mean(split_1)
-    mean_split_2 = mean(split_2) 
-
-    sse_split_1 = 0
-    sse_split_2 = 0
-    for y in split_1: 
-        sse_split_1 += (y-mean_split_1)**2
-    for y in split_2: 
-        sse_split_2 += (y-mean_split_2)**2
-    
-    sse = (sse_split_1 + sse_split_2)
-
-    return sse
-
-
-def sse2(split_1, split_2):
     '''
     Calculates the SSE of two series
     Parameters:
@@ -54,19 +32,20 @@ def sse2(split_1, split_2):
 
     return sse
 
+
+
 def mse(split_1, split_2):
     '''
     MSE splitting criterion
     '''
-    mean_split_1 = mean(split_1)
-    mean_split_2 = mean(split_2) 
+    mean_split_1 = split_1.mean()
+    mean_split_2 = split_2.mean() 
+
+
+    mse_split_1 = (((split_1 - mean_split_1)**2).sum())/len(split_1)
+    mse_split_2 = (((split_2 - mean_split_2)**2).sum())/len(split_2)
     
-    for y in split_1: 
-        mse_split_1 += ((y-mean_split_1)**2)/split_1.sum()
-    for y in split_2: 
-        mse_split_2 += ((y-mean_split_2)**2)/split_2.sum()
-    
-    mse = (mse_split_1+mse_split_2)
+    mse = mse_split_1 + mse_split_2
 
     return mse
 
@@ -75,15 +54,14 @@ def mae(split_1, split_2):
     '''
     MAE splitting criterion
     '''
-    mean_split_1 = mean(split_1)
-    mean_split_2 = mean(split_2) 
+    mean_split_1 = split_1.mean()
+    mean_split_2 = split_2.mean() 
+
+
+    mae_split_1 = ((abs(split_1 - mean_split_1)).sum())/len(split_1)
+    mae_split_2 = ((abs(split_2 - mean_split_2)).sum())/len(split_2)
     
-    for y in split_1: 
-        mae_split_1 += abs(y-mean_split_1)/split_1.sum()
-    for y in split_2: 
-        mae_split_2 += abs(y-mean_split_2)/split_2.sum()
-    
-    mae = (mae_split_1+mae_split_2)
+    mae = mae_split_1 + mae_split_2
 
     return mae
 
@@ -129,7 +107,12 @@ def splitting_measure(df, target, split_criterion, max_features=None):
             for i in range(0,n): #Itterate over all split values
                 if split_criterion == "sse":
                     #Calculates the SSE for each possible split, the sse is saved with the key of x for which the split is val > x
-                    score = sse2(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+                    score = sse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+                elif split_criterion == "mse":
+                    score = mse(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+                elif split_criterion == "mae":
+                    score = mae(split_candidate_sorted.loc[:i, target], split_candidate_sorted.loc[i: , target])
+
                 #Store the results of the evaluation function as a value belonging the key which is the split value
                 split_scores[split_candidate_sorted.loc[i,col]] = score
 

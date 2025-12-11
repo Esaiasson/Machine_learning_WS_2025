@@ -33,23 +33,26 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
     for i, combo in enumerate(combinations_list):
         print(f"Running combo: {i+1} out of: {len(combinations_list)}")
         start = time.perf_counter()
-        scores = []    
+        rmse_scores = []
+        mae_scores = []    
 
         for train_index, test_index in kf.split(df):
             df_train_index = df.index[train_index]
             df_test_index = df.index[test_index]
             created_model = model(df.loc[df_train_index, ], target, combo, split_criterion=combo["split_criterion"])
             predictions = pred_function(created_model, df.loc[df_test_index, ])
-            score = eval.rmse(df.loc[df_test_index, target], predictions)
-            scores.append(score)
+            rmse, mae = eval.measure_predictions(df.loc[df_test_index, target], predictions)
+            rmse_scores.append(rmse)
+            mae_scores.append(mae)
             
         end = time.perf_counter()
-        mean_score = eval.cross_validation_score(scores)
+        mean_rmse = eval.cross_validation_score(rmse_scores)
+        mean_mae = eval.cross_validation_score(mae_scores)
         
-        results.append({"runtime": end - start, "mean_score": mean_score, "Parameters": combo})
+        results.append({"runtime": end - start, "mean_rmse": mean_rmse, "mean_mae": mean_mae,"Parameters": combo})
         
     results_df = pd.DataFrame.from_dict(results)
-    sorted_results_df = results_df.sort_values("mean_score", ignore_index=True, ascending=True)
+    sorted_results_df = results_df.sort_values("mean_rmse", ignore_index=True, ascending=True)
     best_model = model(df, target, sorted_results_df.loc[0,"Parameters"], split_criterion=sorted_results_df.loc[0,"Parameters"]["split_criterion"])
     return best_model, sorted_results_df
 

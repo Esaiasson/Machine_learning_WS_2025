@@ -32,8 +32,8 @@ def plot_parameter(train_results_food_waste, train_results_college_rank, param_g
         ax1.set_xticks(range(int(df_static_food_waste[param].min()), int(df_static_food_waste[param].max()) + 1))
         
         #Performance metric plot
-        ax2.plot(df_static_food_waste[param], df_static_food_waste["mean_score"])
-        ax2.plot(df_static_college_rank[param], df_static_college_rank["mean_score"])
+        ax2.plot(df_static_food_waste[param], df_static_food_waste["mean_rmse"])
+        ax2.plot(df_static_college_rank[param], df_static_college_rank["mean_rmse"])
         ax2.set_xlabel(f"{param}")
         ax2.set_ylabel("Score")
         ax2.set_xticks(range(int(df_static_food_waste[param].min()), int(df_static_food_waste[param].max()) + 1))

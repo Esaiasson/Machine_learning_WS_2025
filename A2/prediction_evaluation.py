@@ -39,7 +39,7 @@ def mae(actual, predicted):
     return mae_score
 
 
-def measure_predictions(target, predictions, measure):
+def measure_predictions(target, predictions):
     '''
     Calculates a given performance measure on predictions
     Parameters: 
@@ -55,14 +55,10 @@ def measure_predictions(target, predictions, measure):
     if isinstance(predictions, (pd.Series, pd.DataFrame)) == False:
         predictions = pd.Series(predictions, index=target.index)
 
-    if measure == 'rmse':
-        score = rmse(target, predictions)
-    elif measure == 'rmse':
-        score = rmse(target, predictions)
-    elif measure == 'rmse':
-        score = rmse(target, predictions)
+    rmse_score = rmse(target, predictions)
+    mae_score = mae(target, predictions)
     
-    return score
+    return rmse_score, mae_score
 
 
 def cross_validation_score(scores):
