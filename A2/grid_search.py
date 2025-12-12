@@ -4,6 +4,7 @@ from joblib import Parallel, delayed
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import make_scorer
 import prediction_evaluation as eval
 import random_forest as rf
