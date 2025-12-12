@@ -135,21 +135,26 @@ def grid_search_scikit(df, target_attribute, param_grid):
       estimator=tree,
       param_grid=param_grid,
       cv=cv_strategy,
-      scoring=make_scorer(eval.rmse, greater_is_better=False),
-      refit=True,
+      scoring={
+        "rmse": make_scorer(eval.rmse, greater_is_better=False),
+        "mae": make_scorer(eval.mae, greater_is_better=False)
+      },
+      refit="rmse",
       verbose=True
   )
 
   grid_search.fit(x,y)
 
   results = pd.DataFrame(grid_search.cv_results_)
-  results["mean_test_score"] = abs(results["mean_test_score"])
-  results_orderd = results.sort_values("mean_test_score", ignore_index=True, ascending=True)
+  results["mean_rmse"] = abs(results["mean_test_rmse"])
+  results["mean_mae"] = abs(results["mean_test_mae"])
+  results_orderd = results.sort_values("mean_rmse", ignore_index=True, ascending=True)
   elapsed = time.perf_counter() - start
   results_orderd["runtime"] = elapsed
   print(grid_search.best_estimator_)
   print("Time(s): ", elapsed)
-  return results_orderd.loc[:5,["runtime", "mean_test_score", "params"]], grid_search.best_estimator_
+  results_orderd.rename(columns={'params':'Parameters'}, inplace=True)
+  return results_orderd.loc[:,["runtime", "mean_rmse", "mean_mae", "Parameters"]], grid_search.best_estimator_
    
 
 
