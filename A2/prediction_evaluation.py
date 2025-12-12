@@ -64,3 +64,17 @@ def measure_predictions(target, predictions):
 def cross_validation_score(scores):
     mean_score = sum(scores)/len(scores)
     return mean_score
+
+
+
+def big_table_formating(dataset, all_results, rmse_own, mae_own, rmse_scikit, mae_scikit):
+    
+    all_results.loc[
+        (all_results["dataset"] == dataset) & (all_results["implementation"] == "Ours"),
+        ["test set rmse", "test set mae"]
+    ] = rmse_own, mae_own
+    all_results.loc[
+        (all_results["dataset"] == dataset) & (all_results["implementation"] == "Scikit"),
+        ["test set rmse", "test set mae"]
+    ] = rmse_scikit, mae_scikit
+    return all_results
