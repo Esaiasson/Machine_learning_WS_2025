@@ -191,6 +191,41 @@ def grid_search_obb(df, target_attribute, param_grid):
     best_model = forests[sorted_results_df.loc[0, "index"]]
     return best_model, sorted_results_df.loc[:5,].drop(labels="index", axis=1)
 
+def grid_search_oob_scikit(df, target_attribute, param_grid):
+    
+    x = df.loc[:, df.columns != target_attribute]
+    y = df[target_attribute]
+    results = []
+    forests = []
+
+    combinations_list = grid_combinations(param_grid)
+
+    for i, combo in enumerate(combinations_list):
+        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
+        start = time.perf_counter()
+        forest = RandomForestRegressor(
+            random_state=1,
+            **combo,
+            bootstrap=True,
+            oob_score=True,
+            # n_jobs=-1,
+        )
+        forest.fit(x,y)
+
+        oob_preds = forest.oob_prediction_
+
+        oob_rmse = eval.rmse(y, oob_preds)
+        oob_mse = eval.mse(y, oob_preds)
+        end = time.perf_counter()
+
+        forests.append(forest)
+        results.append({"runtime": end - start, "mean_rmse": oob_rmse, "mean_mse": oob_mse, "Parameters": combo, "index": i})
+
+    results_df = pd.DataFrame.from_dict(results)
+    sorted_results_df = results_df.sort_values("mean_rmse", ignore_index=True, ascending=True)
+    best_model = forests[sorted_results_df.loc[0, "index"]]
+    return sorted_results_df.drop(labels="index", axis=1), best_model
+
 
 
 
