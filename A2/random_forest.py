@@ -2,7 +2,6 @@ import regression_tree
 import numpy as np
 import pandas as pd
 import math
-import random
 
 def get_random_max_features(df):
     total_features = df.size
@@ -49,7 +48,6 @@ def populate_forest(df, target, stop, split_criterion, no_of_estimators, max_fea
     for tree_id in range(no_of_estimators):
         df_boot, df_oob = bootstrap(df, tree_id)
 
-        # parallelize tree building
         tree = regression_tree.regression_tree(
             df_boot,
             target,
