@@ -16,6 +16,9 @@ def plot_parameter(train_results_food_waste, train_results_college_rank, train_r
         df_static_food_waste = df_food_waste.copy()
         df_static_college_rank = df_college_rank.copy()
         df_static_popular_songs = df_popular_songs.copy()
+        
+        print(df_static_food_waste[param])
+
         for key, val in eval_param.items():
             if key != param:
                 df_static_food_waste = df_static_food_waste[df_static_food_waste[key] == val]
@@ -31,7 +34,6 @@ def plot_parameter(train_results_food_waste, train_results_college_rank, train_r
 
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
         fig.suptitle(f"{param}")
-
         #Runtime plot
         ax1.plot(df_static_food_waste[param], df_static_food_waste["runtime"], label="Food Wastage")
         ax1.plot(df_static_college_rank[param], df_static_college_rank["runtime"], label="University Ranking")

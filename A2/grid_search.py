@@ -160,37 +160,54 @@ def grid_search_scikit(df, target_attribute, param_grid):
    
 
 
-def grid_search_obb(df, target_attribute, param_grid):
-    
-    results = []
-    forests = []
+def evaluate_combo_oob(combo, df, target):
+    start = time.perf_counter()
 
+    forest = rf.populate_forest(
+        df,
+        target,
+        combo,
+        split_criterion=combo["split_criterion"],
+        no_of_estimators=combo["no_of_estimators"],
+        max_features_criterion=combo["max_features_criterion"]
+    )
+
+    predictions = rf.eval_oob(forest, df, target)
+    pred_and_target = df[target].to_frame().join(predictions.to_frame(), how='outer')
+    pred_and_target = pred_and_target.dropna()
+
+    rmse, mae = eval.measure_predictions(pred_and_target[target], pred_and_target["prediction"])
+    end = time.perf_counter()
+
+    return {
+        "runtime": end - start,
+        "mean_rmse": rmse,
+        "mean_mae": mae,
+        "Parameters": combo,
+        "forest": forest
+    }
+
+def grid_search_oob2(df, target_attribute, param_grid):
+    
     combinations_list = grid_combinations(param_grid)
 
-    for i, combo in enumerate(combinations_list):
-        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
-        start = time.perf_counter()
-        forest = rf.populate_forest(
-            df,
-            target_attribute,
-            combo,
-            split_criterion=combo["split_criterion"],
-            no_of_estimators=combo["no_of_estimators"],
-            max_features_criterion=combo["max_features_criterion"]
-        )
-        predictions = rf.eval_oob(forest, df, target_attribute)
-        pred_and_target = df[target_attribute].to_frame().join(predictions.to_frame(), how='outer')
-        pred_and_target = pred_and_target.dropna()
-        score = eval.rmse(pred_and_target[target_attribute], pred_and_target["prediction"])
-        end = time.perf_counter()
+    # run all combos in parallel
+    results = Parallel(n_jobs=-1, verbose=10)(
+        delayed(evaluate_combo_oob)(combo, df, target_attribute)
+        for combo in combinations_list
+    )
 
-        forests.append(forest)
-        results.append({"runtime": end - start, "mean_score": score, "Parameters": combo, "index": i})
+    results_df = pd.DataFrame(results)
+    sorted_results_df = results_df.sort_values("mean_rmse", ignore_index=True, ascending=True)
 
-    results_df = pd.DataFrame.from_dict(results)
-    sorted_results_df = results_df.sort_values("mean_score", ignore_index=True, ascending=True)
-    best_model = forests[sorted_results_df.loc[0, "index"]]
-    return best_model, sorted_results_df.loc[:5,].drop(labels="index", axis=1)
+    # best forest = the stored one
+    best_model = sorted_results_df.loc[0, "forest"]
+
+    # drop forest objects before showing results
+    cleaned_results = sorted_results_df.drop(columns=["forest"])
+    
+    return best_model, cleaned_results.loc[:5, ]
+
 
 def grid_search_oob_scikit(df, target_attribute, param_grid):
     
