@@ -3,6 +3,7 @@ import time
 from joblib import Parallel, delayed
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import make_scorer
 import prediction_evaluation as eval
 import random_forest as rf
@@ -190,5 +191,18 @@ def grid_search_obb(df, target_attribute, param_grid):
     best_model = forests[sorted_results_df.loc[0, "index"]]
     return best_model, sorted_results_df.loc[:5,].drop(labels="index", axis=1)
 
+
+
+
+def knn(df, target_attribute):
+    x = df.loc[:, df.columns != target_attribute]
+    y = df[target_attribute]
+    start = time.perf_counter()
+
+    knn = KNeighborsClassifier()
+    knn.fit(x, y)
+    end = time.perf_counter()
+    runtime = (end - start)
     
+    return knn, runtime 
         
