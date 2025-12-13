@@ -1,19 +1,63 @@
-import pandas as pd
 import re
-import matplotlib.pyplot as plt
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
-def df_info(df, target, split):
-    print(f"The {split} dataframe consists of {df.shape[0]} rows, and {df.shape[1]} attributes")
-    if split == "full":
-        na_rows = df.isnull().any(axis=1).sum()
-        print(f"Rows containing NA values before preprocessing: {na_rows}")    
+def df_info(full_df, train_df, test_df, target):
+    """
+    Prints dataframe info and plots distribution histograms for full, train, and test datasets
+    in a single row of subplots.
 
-    plt.figure(figsize=(8, 6))
-    plt.hist(df[target], bins=10)
-    plt.title(f'Distribution of target attribute in {split} dataset: {target}')
-    plt.tight_layout()
-    plt.show()
+    Parameters:
+        full_df: Full dataset (pandas DataFrame)
+        train_df: Training split (pandas DataFrame)
+        test_df: Testing split (pandas DataFrame)
+        target: Name of the target column (str)
+    """
+
+    # Print basic info
+    for split_name, df in zip(["Full", "Train", "Test"], [full_df, train_df, test_df]):
+        print(f"{split_name} dataframe: {df.shape[0]} rows, {df.shape[1]} attributes")
+        if split_name == "Full":
+            na_rows = df.isnull().any(axis=1).sum()
+            print(f"Rows containing NA values before preprocessing: {na_rows}")
+
+    # Create subplot figure with 1 row and 3 columns
+    fig = make_subplots(
+        rows=1, cols=3, shared_yaxes=True,
+        subplot_titles=["Full dataset", "Train dataset", "Test dataset"]
+    )
+
+    datasets = [full_df, train_df, test_df]
+    colors = ["#636EFA", "#EF553B", "#00CC96"]
+
+    for i, df in enumerate(datasets, start=1):
+        fig.add_trace(
+            go.Histogram(
+                x=df[target],
+                nbinsx=10,
+                name=f"{['Full','Train','Test'][i-1]}",
+                marker_color=colors[i-1]
+            ),
+            row=1,
+            col=i
+        )
+
+    # Update layout
+    fig.update_layout(
+        title_text=f"Distribution of target attribute: {target} in Full, Train, and Test splits",
+        height=500,
+        width=1200,
+        showlegend=False
+    )
+    
+    # Update axes labels
+    for i in range(1,4):
+        fig.update_xaxes(title_text=target, row=1, col=i)
+        fig.update_yaxes(title_text="Frequency", row=1, col=i)
+
+    fig.show()
     
 
 

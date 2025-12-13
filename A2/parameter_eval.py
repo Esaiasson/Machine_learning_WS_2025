@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd 
 
-def plot_parameter(train_results_food_waste, train_results_college_rank, train_results_popular_songs, param_grid, eval_param):
+def plot_parameter(train_results_food_waste, train_results_college_rank, train_results_popular_songs, param_grid, eval_param, rf=False):
     df_food_waste = train_results_food_waste.join(train_results_food_waste['Parameters'].apply(pd.Series))
     df_college_rank = train_results_college_rank.join(train_results_college_rank['Parameters'].apply(pd.Series))
     df_popular_songs = train_results_popular_songs.join(train_results_popular_songs['Parameters'].apply(pd.Series))
@@ -12,12 +12,15 @@ def plot_parameter(train_results_food_waste, train_results_college_rank, train_r
 
     
     for param in param_grid.keys():
-
-        df_static_food_waste = df_food_waste.copy()
-        df_static_college_rank = df_college_rank.copy()
-        df_static_popular_songs = df_popular_songs.copy()
+        if param == 'split_criterion' and rf == True:
+            continue
         
-        print(df_static_food_waste[param])
+        else:
+            df_static_food_waste = df_food_waste.copy()
+            df_static_college_rank = df_college_rank.copy()
+            df_static_popular_songs = df_popular_songs.copy()
+        
+        # print(df_static_food_waste[param])
 
         for key, val in eval_param.items():
             if key != param:

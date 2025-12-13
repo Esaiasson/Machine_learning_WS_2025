@@ -219,7 +219,7 @@ def grid_search_oob_scikit(df, target_attribute, param_grid):
     combinations_list = grid_combinations(param_grid)
 
     for i, combo in enumerate(combinations_list):
-        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
+        # print(f"Running combo: {i+1} out of: {len(combinations_list)}")
         start = time.perf_counter()
         forest = RandomForestRegressor(
             random_state=1,
