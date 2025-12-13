@@ -206,7 +206,7 @@ def grid_search_oob(df, target_attribute, param_grid):
     # drop forest objects before showing results
     cleaned_results = sorted_results_df.drop(columns=["forest"])
     
-    return best_model, cleaned_results.loc[:5, ]
+    return best_model, cleaned_results
 
 
 def grid_search_oob_scikit(df, target_attribute, param_grid):
