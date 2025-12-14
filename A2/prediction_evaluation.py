@@ -67,14 +67,14 @@ def cross_validation_score(scores):
 
 
 
-def big_table_formating(dataset, all_results, rmse_own, mae_own, rmse_scikit, mae_scikit):
+def big_table_formating(dataset, all_results, rmse_own, mae_own, rmse_scikit, mae_scikit, algorithm):
     
     all_results.loc[
-        (all_results["dataset"] == dataset) & (all_results["implementation"] == "Ours"),
+        (all_results["dataset"] == dataset) & (all_results["implementation"] == "Ours") & (all_results["algorithm"]==algorithm),
         ["test set rmse", "test set mae"]
     ] = rmse_own, mae_own
     all_results.loc[
-        (all_results["dataset"] == dataset) & (all_results["implementation"] == "Scikit"),
+        (all_results["dataset"] == dataset) & (all_results["implementation"] == "Scikit") & (all_results["algorithm"]==algorithm),
         ["test set rmse", "test set mae"]
     ] = rmse_scikit, mae_scikit
     return all_results
