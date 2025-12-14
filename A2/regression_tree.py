@@ -38,6 +38,9 @@ def sse(split_1, split_2):
 def mse(split_1, split_2):
     '''
     MSE splitting criterion
+    Parameters:
+        split_1: A pandas series
+        split_2: A pandas series
     '''
     mean_split_1 = split_1.mean()
     mean_split_2 = split_2.mean() 
@@ -49,19 +52,6 @@ def mse(split_1, split_2):
     mse = mse_split_1 + mse_split_2
 
     return mse
-
-
-def mae():
-    '''
-    MAE splitting criterion
-    '''
-    pass
-
-def friedman_mse():
-    '''
-    Friedman MSE splitting criterion
-    '''
-    pass
 
 
 def splitting_measure(df, target, split_criterion, max_features=None):
@@ -203,7 +193,6 @@ def splitting_measure_delta(df, target, split_criterion, max_features=None):
 
 
 
-
 def std_dev(attribute):
     '''
     Calculates the standard deviation of a attribute
@@ -221,6 +210,8 @@ def std_dev(attribute):
     standard_deviation = math.sqrt(mean_deviation/(n-1)) # Formula for standard deviation
 
     return standard_deviation
+
+
 
 def evaluate_stopping_criterion(stop, df_length, current_depth=None):
     '''

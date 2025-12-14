@@ -10,6 +10,8 @@ import prediction_evaluation as eval
 import random_forest as rf
 import itertools
 
+
+# Regression Trees --------------------
 def grid_combinations(param_grid):
     #BORROWED FROM: https://stackoverflow.com/questions/38721847/how-to-generate-all-combination-from-values-in-dict-of-lists-in-python
     keys, values = zip(*param_grid.items())
@@ -71,53 +73,6 @@ def grid_search_cv2(df, target, model, pred_function, param_grid):
 
 
 
-
-def grid_search_cv(df, target, model, pred_function, param_grid):
-    '''
-    Function to perform grid search of a set of hyperparameters with cross validation
-    Parameters:
-        df: Dataframe to train and evalute on 
-        target: Attribute in the dataframe that is the target
-        model: A regression model
-        pred_function: The method to make predictions
-        param_grid: A dictionary of parameters to test
-    '''
-    
-    combinations_list = grid_combinations(param_grid)
-            
-    kf = KFold(n_splits=5, shuffle=True)
-
-    results = []
-
-    for i, combo in enumerate(combinations_list):
-        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
-        start = time.perf_counter()
-        rmse_scores = []
-        mae_scores = []    
-
-        for train_index, test_index in kf.split(df):
-            df_train_index = df.index[train_index]
-            df_test_index = df.index[test_index]
-            created_model = model(df.loc[df_train_index, ], target, combo, split_criterion=combo["split_criterion"])
-            predictions = pred_function(created_model, df.loc[df_test_index, ])
-            rmse, mae = eval.measure_predictions(df.loc[df_test_index, target], predictions)
-            rmse_scores.append(rmse)
-            mae_scores.append(mae)
-            
-        end = time.perf_counter()
-        mean_rmse = eval.cross_validation_score(rmse_scores)
-        mean_mae = eval.cross_validation_score(mae_scores)
-        
-        results.append({"runtime": end - start, "mean_rmse": mean_rmse, "mean_mae": mean_mae,"Parameters": combo})
-        
-    results_df = pd.DataFrame.from_dict(results)
-    sorted_results_df = results_df.sort_values("mean_rmse", ignore_index=True, ascending=True)
-    best_model = model(df, target, sorted_results_df.loc[0,"Parameters"], split_criterion=sorted_results_df.loc[0,"Parameters"]["split_criterion"])
-    return best_model, sorted_results_df
-
-
-
-
 def grid_search_scikit(df, target_attribute, param_grid):
 
     x = df.loc[:, df.columns != target_attribute]
@@ -160,6 +115,7 @@ def grid_search_scikit(df, target_attribute, param_grid):
     
 
 
+# Random Forest --------------------
 def evaluate_combo_oob(combo, df, target):
     start = time.perf_counter()
 

@@ -12,6 +12,7 @@ def bootstrap(df, tree_id):
     '''
     generate the bootstrap sample from original data (with replacement) + oob_sample
     '''
+    # put axlain here
     n = len(df)
     df_idx = list(df.index)
 
