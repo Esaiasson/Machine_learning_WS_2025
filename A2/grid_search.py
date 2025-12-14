@@ -120,44 +120,44 @@ def grid_search_cv(df, target, model, pred_function, param_grid):
 
 def grid_search_scikit(df, target_attribute, param_grid):
 
-  x = df.loc[:, df.columns != target_attribute]
-  y = df[target_attribute]
+    x = df.loc[:, df.columns != target_attribute]
+    y = df[target_attribute]
 
-  start = time.perf_counter()
+    start = time.perf_counter()
 
-  tree = DecisionTreeRegressor(random_state=1)
+    tree = DecisionTreeRegressor(random_state=1)
 
-  cv_strategy = KFold(
-    n_splits=5,
-    shuffle=True,
-    random_state=1
-  )
+    cv_strategy = KFold(
+        n_splits=5,
+        shuffle=True,
+        random_state=1
+    )
 
-  grid_search = GridSearchCV(
-      estimator=tree,
-      param_grid=param_grid,
-      cv=cv_strategy,
-      scoring={
-        "rmse": make_scorer(eval.rmse, greater_is_better=False),
-        "mae": make_scorer(eval.mae, greater_is_better=False)
-      },
-      refit="rmse",
-      verbose=True
-  )
+    grid_search = GridSearchCV(
+        estimator=tree,
+        param_grid=param_grid,
+        cv=cv_strategy,
+        scoring={
+            "rmse": make_scorer(eval.rmse, greater_is_better=False),
+            "mae": make_scorer(eval.mae, greater_is_better=False)
+        },
+        refit="rmse",
+        verbose=True
+    )
 
-  grid_search.fit(x,y)
+    grid_search.fit(x,y)
 
-  results = pd.DataFrame(grid_search.cv_results_)
-  results["mean_rmse"] = abs(results["mean_test_rmse"])
-  results["mean_mae"] = abs(results["mean_test_mae"])
-  results_orderd = results.sort_values("mean_rmse", ignore_index=True, ascending=True)
-  elapsed = time.perf_counter() - start
-  results_orderd["runtime"] = elapsed
-  print(grid_search.best_estimator_)
-  print("Time(s): ", elapsed)
-  results_orderd.rename(columns={'params':'Parameters'}, inplace=True)
-  return results_orderd.loc[:,["runtime", "mean_rmse", "mean_mae", "Parameters"]], grid_search.best_estimator_
-   
+    results = pd.DataFrame(grid_search.cv_results_)
+    results["mean_rmse"] = abs(results["mean_test_rmse"])
+    results["mean_mae"] = abs(results["mean_test_mae"])
+    results_orderd = results.sort_values("mean_rmse", ignore_index=True, ascending=True)
+    elapsed = time.perf_counter() - start
+    results_orderd["runtime"] = elapsed
+    print(grid_search.best_estimator_)
+    print("Time(s): ", elapsed)
+    results_orderd.rename(columns={'params':'Parameters'}, inplace=True)
+    return results_orderd.loc[:,["runtime", "mean_rmse", "mean_mae", "Parameters"]], grid_search.best_estimator_
+    
 
 
 def evaluate_combo_oob(combo, df, target):
@@ -187,7 +187,7 @@ def evaluate_combo_oob(combo, df, target):
         "forest": forest
     }
 
-def grid_search_oob2(df, target_attribute, param_grid):
+def grid_search_oob(df, target_attribute, param_grid):
     
     combinations_list = grid_combinations(param_grid)
 
@@ -206,7 +206,7 @@ def grid_search_oob2(df, target_attribute, param_grid):
     # drop forest objects before showing results
     cleaned_results = sorted_results_df.drop(columns=["forest"])
     
-    return best_model, cleaned_results.loc[:5, ]
+    return best_model, cleaned_results
 
 
 def grid_search_oob_scikit(df, target_attribute, param_grid):
@@ -219,14 +219,14 @@ def grid_search_oob_scikit(df, target_attribute, param_grid):
     combinations_list = grid_combinations(param_grid)
 
     for i, combo in enumerate(combinations_list):
-        print(f"Running combo: {i+1} out of: {len(combinations_list)}")
+        # print(f"Running combo: {i+1} out of: {len(combinations_list)}")
         start = time.perf_counter()
         forest = RandomForestRegressor(
             random_state=1,
             **combo,
             bootstrap=True,
             oob_score=True,
-            # n_jobs=-1,
+            n_jobs=-1,
         )
         forest.fit(x,y)
 
@@ -257,5 +257,4 @@ def knn(df, target_attribute):
     end = time.perf_counter()
     runtime = (end - start)
     
-    return knn, runtime 
-        
+    return knn, runtime

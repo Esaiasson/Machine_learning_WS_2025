@@ -46,10 +46,12 @@ def preprocessing_college_ranking():
     df = pd.read_csv("data/US-News-Rankings-Universities-Through-2023.csv")
     states_map = states_mapping(df)
     print("Dataset University Ranking")
-    pre.df_info(df, "2023", "full")
     df_train, df_test = pre.train_test_split(df)
-    pre.df_info(df_train, "2023", "train")
-    pre.df_info(df_test, "2023", "test")
+    pre.df_info(
+        df, 
+        df_train, 
+        df_test, 
+        "2023")
     
 
     df_train_processed = apply_processing(df_train, states_map)

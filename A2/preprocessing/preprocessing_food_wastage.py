@@ -29,23 +29,16 @@ def preprocessing_food_wastage():
     
     df = pd.read_csv("data/food_wastage_data.csv")
     print("Dataset Food Wastage")
-    pre.df_info(df, "Wastage Food Amount", "full")
+    
     df_train, df_test = pre.train_test_split(df)
-    pre.df_info(df_train, "Wastage Food Amount", "train")
-    pre.df_info(df_test, "Wastage Food Amount", "test")
+    
+    pre.df_info(
+        df, 
+        df_train, 
+        df_test, 
+        "Wastage Food Amount")
     
     df_train_processed = apply_processing(df_train)
     df_test_processed = apply_processing(df_test)
     
     return df_train_processed, df_test_processed
-    
-
-
-
-
-
-
-    
-
-    
-
