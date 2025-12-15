@@ -1,18 +1,16 @@
-import regression_tree
+import regression_tree as rt
 import numpy as np
 import pandas as pd
 import math
-import random
 
-def get_random_max_features(df):
-    total_features = df.size
-    max_random_features_split_criterion = math.sqrt(total_features)
 
 def bootstrap(df, tree_id):
     '''
     generate the bootstrap sample from original data (with replacement) + oob_sample
+    Parameters:
+        df: dataset to build bootstrap sample from
+        tree_id: reproducibility parameter, used to calculate the seed
     '''
-    # put axlain here
     n = len(df)
     df_idx = list(df.index)
 
@@ -51,7 +49,7 @@ def populate_forest(df, target, stop, split_criterion, no_of_estimators, max_fea
         df_boot, df_oob = bootstrap(df, tree_id)
 
         # parallelize tree building
-        tree = regression_tree.regression_tree(
+        tree = rt.regression_tree(
             df_boot,
             target,
             stop,
@@ -78,7 +76,7 @@ def eval_oob(forest, df, target):
         oob_data_idx = forest[tree_id]['oob_data']
         oob_data = df.loc[oob_data_idx]
 
-        pred = regression_tree.predict_from_tree(tree, oob_data)
+        pred = rt.predict_from_tree(tree, oob_data)
         name = f'pred_{tree_id}'
         pred_series = pd.Series(pred, index = oob_data_idx, name=name).to_frame()
     
@@ -99,7 +97,7 @@ def predict_from_forest(df, forest):
     for tree_id in forest.keys():     
         tree = forest[tree_id]['estimator']
 
-        pred = regression_tree.predict_from_tree(tree, df)
+        pred = rt.predict_from_tree(tree, df)
         name = f'pred_{tree_id}'
     
         tree_preds[name] = pred
