@@ -24,22 +24,22 @@ def update_q_table(q_table, g_values):
             q_table[s_a] = {"sum": g_value, "visits": 1, "mean": g_value}
 
     return q_table
-      
 
 
 
 
-q_table = {}
+# q_table = {}
+
 
 #s_a_pairs = episode()
 
-s_a_pairs_1=[((0,0), (-1,-1)),((0,2), (-1,-1)), ((0,3), (-1,-1))]
-s_a_pairs_2=[((0,0), (-1,-1)),((0,2), (-1,-1)), ((0,3), (-1,-1)), ((1,3), (-1,-1)), ((2,3), (-1,-1))]
+# s_a_pairs_1=[((0,0), (-1,-1)),((0,2), (-1,-1)), ((0,3), (-1,-1))]
+# s_a_pairs_2=[((0,0), (-1,-1)),((0,2), (-1,-1)), ((0,3), (-1,-1)), ((1,3), (-1,-1)), ((2,3), (-1,-1))]
 
-g_values = calculate_g(s_a_pairs_1)
-q_table = update_q_table(q_table, g_values)
+# g_values = calculate_g(s_a_pairs_1)
+# q_table = update_q_table(q_table, g_values)
 
-g_values = calculate_g(s_a_pairs_2)
-q_table = update_q_table(q_table, g_values)
+# g_values = calculate_g(s_a_pairs_2)
+# q_table = update_q_table(q_table, g_values)
 
-print(q_table)
+# print(q_table)
