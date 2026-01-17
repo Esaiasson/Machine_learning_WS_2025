@@ -59,7 +59,7 @@ def path_validity(velocity, initial_position, final_position, obstacles):
     print("Path:", path)
     return True
 
-def select_next_action(state, q_table,  epsilon):
+def select_next_action(state, q_table, epsilon):
     '''
     Docstring for select_next_action
     
@@ -67,38 +67,53 @@ def select_next_action(state, q_table,  epsilon):
     :param q_table: Description
     :param epsilon: Description
     '''
+    best_expected_return = float('-inf') 
+    best_action = None
+    possible_actions = q_table[state] 
+    for action in possible_actions.keys():
+        if action["mean"] > best_expected_return:
+            best_expected_return = action["mean"]
+            best_action = action
+    
 
 
-def episode():
-
+def initial_state_action():
+    
     # item0: v_velocity, item1: h_velocity
-    velocity = (0, 0)
+    intial_velocity = (0, 0)
     # item0: v_position, item1: h_position
-    position = generate_start()
-    travelled_states = [(position, velocity)]
+    intial_position = generate_start()
+
+    print("Current position: ", intial_position)
+    # initialize potential next position and velocity
+    potential_action = random.sample(action_space, 1)[0]
+    potential_vel = change_velocity(intial_velocity, potential_action)
+    print("Potential action: ", potential_action)
+    print("Potential velocity: ", potential_vel)
+
+    # check both
+    while ((abs(potential_vel[0]) > 2) or (abs(potential_vel[1]) > 2)) or (potential_vel[0] == 0 and potential_vel[1] == 0):
+        # check max velocity < 2
+        # check next velocity not null
+        potential_action = random.sample(action_space, 1)[0]
+        potential_vel = change_velocity(intial_velocity, potential_action)
+
+    # update velocity
+    next_velocity = potential_vel
+    action = potential_action
+    state = (intial_position, intial_velocity)
+    return ((state), action), next_velocity
+
+def episode(q_table):
+
+    state_actions = []
+    
+    intial_state_action, velocity = initial_state_action()
+    state_actions.append(intial_state_action)
 
     # iteration = 0
     while True:
-        print("Current position: ", position)
-        # initialize potential next position and velocity
-        potential_action = random.sample(action_space, 1)[0]
-        potential_vel = change_velocity(velocity, potential_action)
-        print("Potential action: ", potential_action)
-        print("Potential velocity: ", potential_vel)
-
-        # check both
-        while ((abs(potential_vel[0]) > 2) or (abs(potential_vel[1]) > 2)) or (potential_vel[0] == 0 and potential_vel[1] == 0):
-            # check max velocity < 2
-            # check next velocity not null
-            potential_action = random.sample(action_space, 1)[0]
-            potential_vel = change_velocity(velocity, potential_action)
-
-        # update velocitu
-        action = potential_action
         
-        velocity = potential_vel
-
-        print("Accepted action: ", potential_action)
         print("Accepted velocity: ", velocity)
 
         potential_position = (position[0] + velocity[0], position[1] + velocity[1])
@@ -114,8 +129,8 @@ def episode():
             position = potential_position
 
             # update travelled_states
-            state = (position, velocity)
-            travelled_states.append(state)
+            #state = (position, velocity)
+            #travelled_states.append(state)
 
 
         else:
@@ -127,8 +142,8 @@ def episode():
             # if invalid path => reset
             position = generate_start()
             velocity = (0, 0)
-            state = (position, velocity)
-            travelled_states.append(state)
+            #state = (position, velocity)
+            #travelled_states.append(state)
 
         print('Accepted position: ', position)
 
@@ -136,8 +151,12 @@ def episode():
             # target not hit => end
             print('Yup! Hit the target :)')
             break
+        
+        action = select_next_action(q_table)
+        state = (position, velocity)
+        state_actions.append((state), action)
 
-    return travelled_states
+    return state_actions
 
 
 episode()

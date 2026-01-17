@@ -1,3 +1,26 @@
+import itertools
+
+def intialize_q_table():
+    
+    q_table = {}
+
+    horisontal = range(0,10)
+    vertical = range(0,17)
+    velocities = [-2, -1, 0, 1, 2]
+    action_space = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
+
+    all_positions = list(itertools.product(horisontal, vertical))
+    all_velocities = list(itertools.product(velocities, velocities))
+    
+    all_states = list(itertools.product(all_positions, all_velocities))
+
+    for state in all_states:
+        q_table[state] = {}
+        for action in action_space:
+            q_table[state][action] = {"sum": 0, "visits": 0, "mean": 0}
+            
+    return q_table
+
 def calculate_g(s_a_pairs):
     gamma = 0.5
     g_values = {}
@@ -24,7 +47,6 @@ def update_q_table(q_table, g_values):
             q_table[s_a] = {"sum": g_value, "visits": 1, "mean": g_value}
 
     return q_table
-
 
 
 
