@@ -140,8 +140,7 @@ def initial_state_action():
     # initialize potential next position and velocity
     potential_action = random.sample(action_space, 1)[0]
     potential_vel = change_velocity(intial_velocity, potential_action)
-    print("Potential action: ", potential_action)
-    print("Potential velocity: ", potential_vel)
+
 
     # check both
     while ((abs(potential_vel[0]) > 2) or (abs(potential_vel[1]) > 2)) or (potential_vel[0] == 0 and potential_vel[1] == 0):
@@ -151,22 +150,27 @@ def initial_state_action():
         potential_vel = change_velocity(intial_velocity, potential_action)
 
     # update velocity
-    next_velocity = potential_vel
     action = potential_action
     state = (intial_position, intial_velocity)
-    return ((state), action), next_velocity
+    return ((state), action)
 
-def episode(q_table):
+
+
+def episode(q_table, epsilon):
 
     state_actions = []
     
-    intial_state_action, velocity = initial_state_action()
+    intial_state_action = initial_state_action()
     state_actions.append(intial_state_action)
-
+    
+    position = intial_state_action[0][0]
+    velocity = intial_state_action[0][1]
+    action = intial_state_action[1]
+    
     # iteration = 0
     while True:
         
-        print("Accepted velocity: ", velocity)
+        velocity = change_velocity(velocity, action)
 
         potential_position = (position[0] + velocity[0], position[1] + velocity[1])
         print("Potential position: ", potential_position)
@@ -204,8 +208,9 @@ def episode(q_table):
             print('Yup! Hit the target :)')
             break
         
-        action = select_next_action(q_table)
         state = (position, velocity)
+        action = select_next_action(state, q_table, epsilon)
+
         state_actions.append((state), action)
 
     return state_actions
@@ -213,7 +218,7 @@ def episode(q_table):
 
 #episode()
 
-state=((0,0),(2,2))
-q_table = test.intialize_q_table()
+#state=((0,0),(2,2))
+#q_table = test.intialize_q_table()
 
-select_next_action(state, q_table, 0.1)
+#select_next_action(state, q_table, 0.1)
