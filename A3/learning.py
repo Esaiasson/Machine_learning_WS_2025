@@ -65,6 +65,7 @@ q_table = intialize_q_table()
 
 #s_a_pairs = episode()
 
+'''
 s_a_pairs_1=[(((0,0), (-2,-1)),(0,-1)),
              (((0,0), (-2,-1)),(1, 1))]
 
@@ -79,4 +80,5 @@ g_values = calculate_g(s_a_pairs_2)
 q_table = update_q_table(q_table, g_values)
 
 print(q_table[((0,0), (-2,-1))] )
+'''
 # print(q_table[((0,0), (-2,-1))][(1,1)] )

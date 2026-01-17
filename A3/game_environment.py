@@ -8,13 +8,17 @@ import learning as test
 walls = (list(range(0, 10)), list(range(0, 17)))
 path = (list(range(0, 10)), list(range(0, 17)))
 
+'''
 obstacles = (
     (8, 5), (9, 5),
     (4, 10), (5, 10), (6, 10), (7, 10), (4, 11),
     (4, 14), (4, 15), (4, 16)
 )
+'''
+obstacles = ()
 
-target = (12, 6)
+target = (4, 6)
+#target = (1,2)
 
 reward_state = -1
 
@@ -30,6 +34,7 @@ def generate_start():
 
 
 def change_velocity(velocity, action):
+
     vel = (velocity[0] + action[0], velocity[1] + action[1])
     return vel
 
@@ -44,7 +49,7 @@ def path_validity(velocity, initial_position, final_position, obstacles):
     for move in h_moves:
         state = [move, initial_position[1]]
         if state in obstacles:
-            print('Oh no! obstacle in the path')
+            #print('Oh no! obstacle in the path')
             return False
         path.append(state)
 
@@ -55,11 +60,11 @@ def path_validity(velocity, initial_position, final_position, obstacles):
     for move in v_moves:
         state = [final_position[0], move]
         if state in obstacles:
-            print('Oh no! obstacle in the path')
+            #print('Oh no! obstacle in the path')
             return False
         path.append(state)
 
-    print("Path:", path)
+    #print("Path:", path)
     return True
 
 def validate_action(velocity,action):
@@ -123,7 +128,7 @@ def select_next_action(state, q_table, epsilon):
     probability_weight.insert(0,probability_best)
 
     best_action = random.choices(all_actions, k=1, weights=probability_weight)
-    return best_action
+    return best_action[0]
 
 
     
@@ -136,7 +141,7 @@ def initial_state_action():
     # item0: v_position, item1: h_position
     intial_position = generate_start()
 
-    print("Current position: ", intial_position)
+    #print("Current position: ", intial_position)
     # initialize potential next position and velocity
     potential_action = random.sample(action_space, 1)[0]
     potential_vel = change_velocity(intial_velocity, potential_action)
@@ -155,25 +160,41 @@ def initial_state_action():
     return ((state), action)
 
 
+def explore_action(state):
+    
+    potential_action = random.sample(action_space, 1)[0]
+    potential_vel = change_velocity(state[1], potential_action)
 
-def episode(q_table, epsilon):
+    # check both
+    while ((abs(potential_vel[0]) > 2) or (abs(potential_vel[1]) > 2)) or (potential_vel[0] == 0 and potential_vel[1] == 0):
+        # check max velocity < 2
+        # check next velocity not null
+        potential_action = random.sample(action_space, 1)[0]
+        potential_vel = change_velocity(state[1], potential_action)
+        
+    return potential_action
+
+
+def episode(q_table, epsilon, explore=True):
 
     state_actions = []
-    
+    route = []    
+
     intial_state_action = initial_state_action()
     state_actions.append(intial_state_action)
     
     position = intial_state_action[0][0]
+    route.append(position)
     velocity = intial_state_action[0][1]
     action = intial_state_action[1]
     
-    # iteration = 0
+    iteration = 0
     while True:
         
         velocity = change_velocity(velocity, action)
 
         potential_position = (position[0] + velocity[0], position[1] + velocity[1])
-        print("Potential position: ", potential_position)
+        #print("Potential position: ", potential_position)
 
         # Validity path ckecks
         wall_check = (potential_position[0] in walls[0]) and (potential_position[1] in walls[1])
@@ -191,9 +212,9 @@ def episode(q_table, epsilon):
 
         else:
             # print('hpos',potential_position[0], 'vpos',potential_position[1])
-            print('Rejected Position: ', potential_position)
-            print('wall start', walls[0])
-            print("ohh no wall!, going back")
+            #print('Rejected Position: ', potential_position)
+            #print('wall start', walls[0])
+            #print("ohh no wall!, going back")
 
             # if invalid path => reset
             position = generate_start()
@@ -201,19 +222,26 @@ def episode(q_table, epsilon):
             #state = (position, velocity)
             #travelled_states.append(state)
 
-        print('Accepted position: ', position)
+        #print('Accepted position: ', position)
 
         if (position == target):
             # target not hit => end
             print('Yup! Hit the target :)')
+            route.append(position)
             break
         
         state = (position, velocity)
-        action = select_next_action(state, q_table, epsilon)
+        if explore == True:
+            action = explore_action(state)
+        else: 
+            action = select_next_action(state, q_table, epsilon)
 
-        state_actions.append((state), action)
+        route.append(position)
+        state_actions.append((state, action))
+        iteration += 1 
+        print((state, action), "itt:", iteration)
 
-    return state_actions
+    return state_actions, route
 
 
 #episode()
