@@ -86,7 +86,6 @@ def select_next_action(state, q_table, epsilon):
     :param epsilon: Description
     '''
     best_expected_return = float('-inf') 
-    best_action = None
     all_actions = []
     possible_actions = q_table[state] 
     allowed_actions = {}
@@ -103,17 +102,15 @@ def select_next_action(state, q_table, epsilon):
     for action in allowed_actions.keys():
         if allowed_actions[action]["mean"] > best_expected_return:
             best_expected_return = allowed_actions[action]["mean"]
-            best_action = action
             all_actions.insert(0, action)
         elif allowed_actions[action]["mean"] == best_expected_return:
-            result = random.sample(range(0,2), 1)
+            result = random.choice([0,1])
             if result == 0:
                 #The alredy existing best action "won" the tie
                 all_actions.append(action)
             else: 
                 #The new action "won" the tie
                 best_expected_return = allowed_actions[action]["mean"]
-                best_action = action
                 all_actions.insert(0, action)
 
         else: 
@@ -127,8 +124,8 @@ def select_next_action(state, q_table, epsilon):
 
     probability_weight.insert(0,probability_best)
 
-    best_action = random.choices(all_actions, k=1, weights=probability_weight)
-    return best_action[0]
+    action = random.choices(all_actions, k=1, weights=probability_weight)
+    return action[0]
 
 
     
