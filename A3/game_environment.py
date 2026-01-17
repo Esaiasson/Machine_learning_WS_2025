@@ -1,4 +1,7 @@
 import random
+import numpy as np
+import learning as test
+
 
 # Environment Setting
 # grid_size:  10 x 17
@@ -59,6 +62,16 @@ def path_validity(velocity, initial_position, final_position, obstacles):
     print("Path:", path)
     return True
 
+def validate_action(velocity,action):
+    
+    potential_vel = change_velocity(velocity, action)
+
+    if ((abs(potential_vel[0]) > 2) or (abs(potential_vel[1]) > 2)) or (potential_vel[0] == 0 and potential_vel[1] == 0):
+        return False
+    else:
+        return True
+
+
 def select_next_action(state, q_table, epsilon):
     '''
     Docstring for select_next_action
@@ -69,11 +82,50 @@ def select_next_action(state, q_table, epsilon):
     '''
     best_expected_return = float('-inf') 
     best_action = None
+    all_actions = []
     possible_actions = q_table[state] 
+    allowed_actions = {}
+    
+    
     for action in possible_actions.keys():
-        if action["mean"] > best_expected_return:
-            best_expected_return = action["mean"]
+        if validate_action(state[1], action) == True:
+            allowed_actions[action] = possible_actions[action]
+        else:
+            #Action is not possible to perform in the current state, without validating constraints
+            pass
+
+
+    for action in allowed_actions.keys():
+        if allowed_actions[action]["mean"] > best_expected_return:
+            best_expected_return = allowed_actions[action]["mean"]
             best_action = action
+            all_actions.insert(0, action)
+        elif allowed_actions[action]["mean"] == best_expected_return:
+            result = random.sample(range(0,2), 1)
+            if result == 0:
+                #The alredy existing best action "won" the tie
+                all_actions.append(action)
+            else: 
+                #The new action "won" the tie
+                best_expected_return = allowed_actions[action]["mean"]
+                best_action = action
+                all_actions.insert(0, action)
+
+        else: 
+            all_actions.append(action)
+
+
+    probability_best = 1 - epsilon
+    nbr_of_possible_actions = len(all_actions)
+    probability_rest = [(epsilon/(nbr_of_possible_actions-1))]
+    probability_weight = probability_rest*(nbr_of_possible_actions-1)
+
+    probability_weight.insert(0,probability_best)
+
+    best_action = random.choices(all_actions, k=1, weights=probability_weight)
+    return best_action
+
+
     
 
 
@@ -159,6 +211,9 @@ def episode(q_table):
     return state_actions
 
 
-episode()
+#episode()
 
-# print(walls)
+state=((0,0),(2,2))
+q_table = test.intialize_q_table()
+
+select_next_action(state, q_table, 0.1)
