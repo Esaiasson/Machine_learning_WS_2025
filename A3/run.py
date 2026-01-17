@@ -14,14 +14,14 @@ for episodes in range(1,1000):
 print("EXPLORING DONE")
 time.sleep(3)
 
-'''
-for episodes in range(1,100000):
+
+for episodes in range(1,1000):
     s_a_pairs, route = game.episode(q_table, 0.1, explore=False)
     g_values = learn.calculate_g(s_a_pairs)
     q_table = learn.update_q_table(q_table, g_values)
-'''    
 
-s_a_pairs, route = game.episode(q_table, 0)
+
+s_a_pairs, route = game.episode(q_table, 0, explore=False)
 print(route)
 
 print("EPISODE DONE!!!!")  

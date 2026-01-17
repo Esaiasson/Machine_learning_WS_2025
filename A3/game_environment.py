@@ -8,16 +8,16 @@ import learning as test
 walls = (list(range(0, 10)), list(range(0, 17)))
 path = (list(range(0, 10)), list(range(0, 17)))
 
-'''
+
 obstacles = (
     (8, 5), (9, 5),
     (4, 10), (5, 10), (6, 10), (7, 10), (4, 11),
     (4, 14), (4, 15), (4, 16)
 )
-'''
-obstacles = ()
 
-target = (4, 6)
+#obstacles = ()
+
+target = (6, 12)
 #target = (1,2)
 
 reward_state = -1

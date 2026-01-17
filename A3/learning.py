@@ -22,7 +22,7 @@ def intialize_q_table():
     return q_table
 
 def calculate_g(s_a_pairs):
-    gamma = 0.5
+    gamma = 0.9
     g_values = {}
     
     for i, s_a in enumerate(s_a_pairs):
