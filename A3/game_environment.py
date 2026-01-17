@@ -1,5 +1,6 @@
 import random
 
+# Environment Setting
 # grid_size:  10 x 17
 walls = [list(range(0, 10)), list(range(0, 17))]
 path = [list(range(0, 10)), list(range(0, 17))]
@@ -13,6 +14,7 @@ obstacles = [
 target = [12, 6]
 
 reward_state = -1
+
 action_space = [[-1, -1], [-1, 0], [-1, 1], [0, -1],
                 [0, 0], [0, 1], [1, -1], [1, 0], [1, 1]]
 
@@ -60,9 +62,9 @@ def path_validity(velocity, initial_position, final_position, obstacles):
 
 def episode():
 
-    # First item in the list is vertical velocity and second is horizontal velocity, i.e. item0: v_velocity, item1: h_velocity
+    # item0: v_velocity, item1: h_velocity
     velocity = [0, 0]
-    # First item in the list is vertical position and second is horizontal position, i.e. item0: v_position, item1: h_position
+    # item0: v_position, item1: h_position
     position = generate_start()
     path = [()]
 
@@ -112,9 +114,7 @@ def episode():
             break
         iteration = iteration+1
 
-    print("Path:")
-    for i in range(len(path)):
-        print(f"X: {path[i]}, ")
-
 
 episode()
+
+# print(walls)
