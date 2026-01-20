@@ -37,7 +37,7 @@ def path_validity(velocity, initial_position, final_position, obstacles):
 
     h_moves = range(start_h, end_h+1)  # horizonatal possible moves
     for move in h_moves:
-        state = [move, initial_position[1]]
+        state = (move, initial_position[1])
         if state in obstacles:
             #print('Oh no! obstacle in the path')
             return False
@@ -48,7 +48,7 @@ def path_validity(velocity, initial_position, final_position, obstacles):
 
     v_moves = range(start_v, end_v+1)
     for move in v_moves:
-        state = [final_position[0], move]
+        state = (final_position[0], move)
         if state in obstacles:
             #print('Oh no! obstacle in the path')
             return False
@@ -132,7 +132,7 @@ def initial_state_action():
     # initialize potential next position and velocity
     potential_action = random.sample(action_space, 1)[0]
     potential_vel = change_velocity(intial_velocity, potential_action)
-
+    
 
     # check both
     while ((abs(potential_vel[0]) > 2) or (abs(potential_vel[1]) > 2)) or (potential_vel[0] == 0 and potential_vel[1] == 0):
@@ -165,7 +165,7 @@ def explore_action(state):
 def episode(q_table, epsilon, target, obstacles, explore=True):
 
     state_actions = []
-    route = []    
+    route = []   
 
     intial_state_action = initial_state_action()
     state_actions.append(intial_state_action)

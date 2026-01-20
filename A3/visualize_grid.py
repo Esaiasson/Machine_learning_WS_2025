@@ -44,7 +44,7 @@ def calculate_path(visited):
 
 
 
-def show_grid(obstacle_tuples, target, rows, cols, visited):
+def show_grid(ax, obstacle_tuples, target, rows, cols, visited):
     
     path = calculate_path(visited)
     traversed = list(set(path) - set(visited))
@@ -72,8 +72,10 @@ def show_grid(obstacle_tuples, target, rows, cols, visited):
         (0, 0, 1, 0.3) #Traversed
     ])
 
-    fig, ax = plt.subplots(figsize=(6, 6))
+    plt.ion()
+    #fig, ax = plt.subplots(figsize=(6, 6))
     
+    ax.clear()
     ax.imshow(grid, origin="lower", cmap=cmap)
 
     
