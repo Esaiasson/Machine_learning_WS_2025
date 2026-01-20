@@ -1,11 +1,23 @@
 import learning as learn
 import game_environment as game
 import time
+import visualize_grid as vis
+
+
+
+target = (6, 12)
+
+
+obstacles = (
+    (8, 5), (9, 5),
+    (4, 10), (5, 10), (6, 10), (7, 10), (4, 11),
+    (4, 14), (4, 15), (4, 16)
+)
 
 q_table = learn.intialize_q_table()
 
 for episodes in range(1,1000):
-    s_a_pairs, route = game.episode(q_table, 0.1,explore=True)
+    s_a_pairs, route = game.episode(q_table, 0.1, target, obstacles, explore=True)
     g_values = learn.calculate_g(s_a_pairs)
     q_table = learn.update_q_table(q_table, g_values)
 
@@ -16,12 +28,12 @@ time.sleep(3)
 
 
 for episodes in range(1,1000):
-    s_a_pairs, route = game.episode(q_table, 0.1, explore=False)
+    s_a_pairs, route = game.episode(q_table, 0.1, target, obstacles, explore=False)
     g_values = learn.calculate_g(s_a_pairs)
     q_table = learn.update_q_table(q_table, g_values)
 
 
-s_a_pairs, route = game.episode(q_table, 0, explore=False)
+s_a_pairs, route = game.episode(q_table, 0, target, obstacles, explore=False)
 print(route)
 
 print("EPISODE DONE!!!!")  
@@ -35,6 +47,11 @@ print(q_table[((6,0), (0,0))])
 print(q_table[((7,0), (0,0))])
 print(q_table[((8,0), (0,0))])
 print(q_table[((9,0), (0,0))])
+
+
+
+#def show_grid(obstacle_tuples, target, rows, cols, visited, path):
+vis.show_grid(obstacles,target, 17, 10, route)
 
 
 
