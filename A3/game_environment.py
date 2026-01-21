@@ -121,12 +121,15 @@ def select_next_action(state, q_table, epsilon):
     
 
 
-def initial_state_action():
+def initial_state_action(starting_pos):
     
     # item0: v_velocity, item1: h_velocity
     intial_velocity = (0, 0)
     # item0: v_position, item1: h_position
-    intial_position = generate_start()
+    if starting_pos == None:
+        intial_position = generate_start()
+    else:
+        intial_position = starting_pos
 
     #print("Current position: ", intial_position)
     # initialize potential next position and velocity
@@ -162,12 +165,12 @@ def explore_action(state):
     return potential_action
 
 
-def episode(q_table, epsilon, target, obstacles, explore=True):
+def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None):
 
     state_actions = []
     route = []   
 
-    intial_state_action = initial_state_action()
+    intial_state_action = initial_state_action(starting_pos)
     state_actions.append(intial_state_action)
     
     position = intial_state_action[0][0]

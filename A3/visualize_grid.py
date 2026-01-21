@@ -1,7 +1,10 @@
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
+import os
 
+
+cwd = os.getcwd() 
 
 obstacles = (
     (8, 5), (9, 5),
@@ -44,7 +47,7 @@ def calculate_path(visited):
 
 
 
-def show_grid(ax, obstacle_tuples, target, rows, cols, visited):
+def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, save=False,):
     
     path = calculate_path(visited)
     traversed = list(set(path) - set(visited))
@@ -77,7 +80,6 @@ def show_grid(ax, obstacle_tuples, target, rows, cols, visited):
     
     ax.clear()
     ax.imshow(grid, origin="lower", cmap=cmap)
-
     
     ax.set_aspect("equal")
     ax.set_xlim(-0.5, cols - 0.5)
@@ -92,7 +94,11 @@ def show_grid(ax, obstacle_tuples, target, rows, cols, visited):
     ax.set_xticklabels([])
     ax.set_yticklabels([])
 
+    plt.title(plotname)
     plt.show()
+
+    if save == True:
+        plt.savefig(f'{cwd}/result_graphs/{plotname}.png')
     
     
 
