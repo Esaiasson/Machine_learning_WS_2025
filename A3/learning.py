@@ -38,18 +38,6 @@ def calculate_g(s_a_pairs):
     return g_values
 
 
-
-# def update_q_table(q_table, g_values):
-#     for s_a, g_value in zip(g_values.keys(), g_values.values()):
-#         if s_a in q_table:
-#             q_table[s_a]["sum"] = q_table[s_a]["sum"] + g_value
-#             q_table[s_a]["visits"] = q_table[s_a]["visits"] + 1 
-#             q_table[s_a]["mean"] = q_table[s_a]["sum"]/q_table[s_a]["visits"]
-#         else: 
-#             q_table[s_a] = {"sum": g_value, "visits": 1, "mean": g_value}
-
-#     return q_table
-
 def update_q_table(q_table, g_values):
     for key, g in g_values.items():
         state = key[0]
@@ -63,22 +51,3 @@ def update_q_table(q_table, g_values):
 q_table = intialize_q_table()
 
 
-#s_a_pairs = episode()
-
-'''
-s_a_pairs_1=[(((0,0), (-2,-1)),(0,-1)),
-             (((0,0), (-2,-1)),(1, 1))]
-
-s_a_pairs_2=[(((0,0), (-2,-1)),(0,-1)),
-             (((0,0), (-2,-1)),(0, 1))]
-
-
-g_values = calculate_g(s_a_pairs_1)
-q_table = update_q_table(q_table, g_values)
-# 
-g_values = calculate_g(s_a_pairs_2)
-q_table = update_q_table(q_table, g_values)
-
-print(q_table[((0,0), (-2,-1))] )
-'''
-# print(q_table[((0,0), (-2,-1))][(1,1)] )

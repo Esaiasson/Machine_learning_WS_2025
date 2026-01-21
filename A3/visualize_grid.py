@@ -47,7 +47,7 @@ def calculate_path(visited):
 
 
 
-def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, save=False,):
+def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, save=False, folder=None):
     
     path = calculate_path(visited)
     traversed = list(set(path) - set(visited))
@@ -98,7 +98,7 @@ def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, s
     plt.show()
 
     if save == True:
-        plt.savefig(f'{cwd}/result_graphs/{plotname}.png')
+        plt.savefig(f'{cwd}/result_graphs/{folder}/{plotname}.png')
     
     
 

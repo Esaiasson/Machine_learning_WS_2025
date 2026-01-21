@@ -178,7 +178,6 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
     velocity = intial_state_action[0][1]
     action = intial_state_action[1]
     
-    iteration = 0
     while True:
         
         velocity = change_velocity(velocity, action)
@@ -195,17 +194,7 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
             # update position
             position = potential_position
 
-            # update travelled_states
-            #state = (position, velocity)
-            #travelled_states.append(state)
-
-
         else:
-            # print('hpos',potential_position[0], 'vpos',potential_position[1])
-            #print('Rejected Position: ', potential_position)
-            #print('wall start', walls[0])
-            #print("ohh no wall!, going back")
-
             # if invalid path => reset
             position = generate_start()
             velocity = (0, 0)
@@ -216,7 +205,6 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
 
         if (position == target):
             # target not hit => end
-            print('Yup! Hit the target :)')
             route.append(position)
             break
         
@@ -228,8 +216,6 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
 
         route.append(position)
         state_actions.append((state, action))
-        iteration += 1 
-        print((state, action), "itt:", iteration)
 
     return state_actions, route
 
