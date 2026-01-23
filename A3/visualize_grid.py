@@ -88,22 +88,22 @@ def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, s
         plt.savefig(f'{cwd}/result_graphs/{folder}/{plotname}.png')
     
     
-def plot_path_length(results):
+def plot_path_length(results, epsilon):
     
     plt.figure(figsize=(8, 5))
     
     for layout, data in results.items():
         path_lenghts = data["path_lengths"]
         
-        episodes = sorted(path_lengths.keys())
-        lengths = [path_lengths[e] for e in episodes]
+        episodes = sorted(path_lenghts.keys())
+        lengths = [path_lenghts[e] for e in episodes]
         
         plt.plot(episodes, lengths, label=layout)
-        
+    
+    plt.ylim((0, 30))
     plt.xlabel("Episode")
     plt.ylabel("Path length")
-    plt.title("Path length over training")
+    plt.title(f"Path length over episodes using epsilon {epsilon}")
     plt.legend()
-    plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'{cwd}/result_graphs/path_length_over_episodes_epsilon_{epsilon}.png')

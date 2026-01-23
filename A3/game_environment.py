@@ -88,7 +88,6 @@ def select_next_action(state, q_table, epsilon):
             #Action is not possible to perform in the current state, without validating constraints
             pass
 
-
     for action in allowed_actions.keys():
         if allowed_actions[action]["mean"] > best_expected_return:
             best_expected_return = allowed_actions[action]["mean"]

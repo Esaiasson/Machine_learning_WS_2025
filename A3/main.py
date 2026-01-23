@@ -8,51 +8,58 @@ results = {
     "layout_3": {},
 }
 
-target_1 = (6, 12)
-obstacles_1 = (
+runtime_layouts = {
+
+}
+
+target_1 = (0,16)
+obstacles_1 = ()
+
+target_2 = (6, 12)
+obstacles_2 = (
     (8, 5), (9, 5),
     (4, 10), (5, 10), (6, 10), (7, 10), (4, 11),
     (4, 14), (4, 15), (4, 16)
 )
 
 
-target_2 = (0,16)
-obstacles_2 = ()
-
-
 target_3 = (9,12)
-'''
-obstacles_3 = (
-    (6, 11), (7, 11), (8, 11), (9,11),
-    (6,11), (6,12), (6,13)
-)
-'''
 
 obstacles_3 = (
     (5, 6),
+    (7,7), (7,8),
     (5, 5), (6,5), (7, 5), (8, 5), (9, 5),
     (4, 10), (5, 10), (6, 10), (7, 10), (4, 11), (4,12),
     (4, 14), (4, 15), (4, 16)
 )
 
+epsilon_values = [0.05, 0.1, 0.3]
 
-start = time.perf_counter()
-starting_pos_lengths_layout1 = run("Layout_1", target_1, obstacles_1, 0.3)
-end = time.perf_counter()
-results["layout_1"]["path_lengths"] = starting_pos_lengths_layout1
-results["layout_1"]["runtime"] = f"{end - start:0.4f}"
+for epsilon in epsilon_values:
+    runtime_layouts[epsilon] = {}
 
-start = time.perf_counter()
-starting_pos_lengths_layout2 = run("Layout_2", target_2, obstacles_2, 0.3)
-end = time.perf_counter()
-results["layout_2"]["path_lengths"] = starting_pos_lengths_layout2
-results["layout_2"]["runtime"] = f"{end - start:0.4f}"
+    start = time.perf_counter()
+    starting_pos_lengths_layout1 = run("Layout_1", target_1, obstacles_1, epsilon)
+    end = time.perf_counter()
+    results["layout_1"]["path_lengths"] = starting_pos_lengths_layout1
+    runtime_layouts[epsilon]["layout_1"]= f"{end - start:0.4f}"
 
-start = time.perf_counter()
-starting_pos_lengths_layout3 = run("Layout_3", target_3, obstacles_3, 0.3)
-end = time.perf_counter()
-results["layout_3"]["path_lengths"] = starting_pos_lengths_layout3
-results["layout_3"]["runtime"] = f"{end - start:0.4f}"
+    start = time.perf_counter()
+    starting_pos_lengths_layout2 = run("Layout_2", target_2, obstacles_2, epsilon)
+    end = time.perf_counter()
+    results["layout_2"]["path_lengths"] = starting_pos_lengths_layout2
+    runtime_layouts[epsilon]["layout_2"] = f"{end - start:0.4f}"
 
-print(results)
-plot_path_length(results)
+    start = time.perf_counter()
+    starting_pos_lengths_layout3 = run("Layout_3", target_3, obstacles_3, epsilon)
+    end = time.perf_counter()
+    results["layout_3"]["path_lengths"] = starting_pos_lengths_layout3
+    runtime_layouts[epsilon]["layout_3"] = f"{end - start:0.4f}"
+
+    plot_path_length(results, epsilon)
+    
+for ep in runtime_layouts.keys():
+    print("Runtimes using epsilon: ", ep)
+    print("Runtime for layout 1:", runtime_layouts[ep]["layout_1"])
+    print("Runtime for layout 2:", runtime_layouts[ep]["layout_2"])
+    print("Runtime for layout 2:",  runtime_layouts[ep]["layout_3"])
