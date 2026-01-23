@@ -6,19 +6,6 @@ import os
 
 cwd = os.getcwd() 
 
-obstacles = (
-    (8, 5), (9, 5),
-    (4, 10), (5, 10), (6, 10), (7, 10), (4, 11),
-    (4, 14), (4, 15), (4, 16)
-)
-
-target = (6, 12)
-
-visited = [(3,0), (3,1), (3,3), (3,6), (3,9), (3,11), (4,12), (6,12)]
-
-path = [(3,0), (3,1), (3,2), (3,3), (3,4), (3,5), (3,6), (3,7), (3,8), (3,9), (3,10), (3,11), (3,12), (4,12), (5,12), (6,12)]
-
-    
 def calculate_path(visited):
     path = []
 
@@ -101,5 +88,22 @@ def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, s
         plt.savefig(f'{cwd}/result_graphs/{folder}/{plotname}.png')
     
     
-
-#show_grid(obstacles, target, 17, 10, visited, path)
+def plot_path_length(results):
+    
+    plt.figure(figsize=(8, 5))
+    
+    for layout, data in results.items():
+        path_lenghts = data["path_lengths"]
+        
+        episodes = sorted(path_lengths.keys())
+        lengths = [path_lengths[e] for e in episodes]
+        
+        plt.plot(episodes, lengths, label=layout)
+        
+    plt.xlabel("Episode")
+    plt.ylabel("Path length")
+    plt.title("Path length over training")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
