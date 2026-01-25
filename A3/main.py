@@ -33,7 +33,7 @@ obstacles_3 = (
     (4, 14), (4, 15), (4, 16)
 )
 
-epsilon_values = [0.05, 0.1, 0.3]
+epsilon_values = [0.3, 0.5, 0.7]
 
 for epsilon in epsilon_values:
     runtime_layouts[epsilon] = {}
@@ -62,4 +62,4 @@ for ep in runtime_layouts.keys():
     print("Runtimes using epsilon: ", ep)
     print("Runtime for layout 1:", runtime_layouts[ep]["layout_1"])
     print("Runtime for layout 2:", runtime_layouts[ep]["layout_2"])
-    print("Runtime for layout 2:",  runtime_layouts[ep]["layout_3"])
+    print("Runtime for layout 3:",  runtime_layouts[ep]["layout_3"])

@@ -19,7 +19,7 @@ def calc_mean_path(episode, episode_lengths, path_lengths):
     return episode_lengths
 
 
-def run(run_name, target, obstacles, gamma):
+def run(run_name, target, obstacles, epsilon):
 
     episode_lengths={}
     
@@ -28,9 +28,15 @@ def run(run_name, target, obstacles, gamma):
 
     plt.ion()
     fig, ax = plt.subplots()
+    
+    for episodes in range(1, 6):
+        s_a_pairs, route = game.episode(q_table, 1, target, obstacles, explore=True)
+        print(f"Random Episode: {episodes}, current path length: {len(route)}")
+        g_values = learn.calculate_g(s_a_pairs)
+        q_table = learn.update_q_table(q_table, g_values)
 
-    for episodes in range(1,8001):
-        s_a_pairs, route = game.episode(q_table, gamma, target, obstacles, explore=False)
+    for episodes in range(1,5001):
+        s_a_pairs, route = game.episode(q_table, epsilon, target, obstacles, explore=False)
         print(f"Episode: {episodes}, current path length: {len(route)}")
         g_values = learn.calculate_g(s_a_pairs)
         q_table = learn.update_q_table(q_table, g_values)
@@ -50,7 +56,7 @@ def run(run_name, target, obstacles, gamma):
 
     for i in range(0,10):
         s_a_pairs, route = game.episode(q_table, 0, target, obstacles, explore=False, starting_pos=(i,0))
-        vis.show_grid(ax, obstacles,target, 17, 10, route, f"Optimal_policy_for_start_({i},0)_epsilon_{gamma}", True, run_name)
+        vis.show_grid(ax, obstacles,target, 17, 10, route, f"Optimal_policy_for_start_({i},0)_epsilon_{epsilon}", True, run_name)
 
     plt.ioff()
     plt.close(fig)

@@ -21,24 +21,8 @@ def intialize_q_table():
             
     return q_table
 
-def calculate_g_old(s_a_pairs):
-    gamma = 0.9
-    g_values = {}
-    
-    for i, s_a in enumerate(s_a_pairs):
-        if s_a not in s_a_pairs[0:i]: #First pass method
-            n = len(s_a_pairs[i+1:])
-            if i+1 < len(s_a_pairs): #i +1 since enumerate starts with 0
-                g = -((1 - (gamma**n))/(1-gamma)) # Simplified calculation since we have a constant reward
-                g_values[s_a] = g
-            else:
-                g = 0 #If the state, action pair is the last in the sequence we know that the reward is 0 since the target is the only terminal node 
-                g_values[s_a] = g
-    # print(g_values)
-    return g_values
 
-
-def calculate_g(s_a_pairs):
+def calculate_g_old2(s_a_pairs):
     gamma = 0.9
     g_values = {}
     g = 0    
@@ -51,6 +35,28 @@ def calculate_g(s_a_pairs):
                 visited.add(s_a)
                 g_values[s_a] = g
     return g_values
+
+def calculate_g(s_a_pairs):
+    gamma = 0.9
+    g_values = {}
+    g = 0    
+    first_visited = {}
+    t_max = len(s_a_pairs)
+
+    for i, s_a in enumerate(s_a_pairs):
+        if s_a not in first_visited:
+            first_visited[s_a] = i #Too keep track of the first position for a state action pair
+
+
+    for i, s_a in enumerate(reversed(s_a_pairs)):
+        if i != 0:
+            g = gamma*g - 1
+            index = t_max -1 - i  #Since i is based on reversed index, we need to get the index position in the forward order
+            if first_visited[s_a] == index: #If this is the first visit
+                g_values[s_a] = g
+                
+    return g_values
+
 
         
 
