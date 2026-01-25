@@ -36,6 +36,7 @@ obstacles_3 = (
 epsilon_values = [0.3, 0.5, 0.7]
 
 for epsilon in epsilon_values:
+    print("Running episodes for epsilon:", epsilon)
     runtime_layouts[epsilon] = {}
 
     start = time.perf_counter()

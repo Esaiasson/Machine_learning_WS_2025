@@ -63,7 +63,6 @@ def show_grid(ax, obstacle_tuples, target, rows, cols, visited, plotname=None, s
     ])
 
     plt.ion()
-    #fig, ax = plt.subplots(figsize=(6, 6))
     
     ax.clear()
     ax.imshow(grid, origin="lower", cmap=cmap)

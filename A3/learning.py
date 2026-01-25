@@ -22,20 +22,6 @@ def intialize_q_table():
     return q_table
 
 
-def calculate_g_old2(s_a_pairs):
-    gamma = 0.9
-    g_values = {}
-    g = 0    
-    visited = set()
-
-    for i, s_a in enumerate(reversed(s_a_pairs)):
-        if i != 0:
-            g = gamma*g - 1
-            if s_a not in visited:
-                visited.add(s_a)
-                g_values[s_a] = g
-    return g_values
-
 def calculate_g(s_a_pairs):
     gamma = 0.9
     g_values = {}

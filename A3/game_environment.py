@@ -29,7 +29,7 @@ def change_velocity(velocity, action):
     return vel
 
 
-def path_validity(velocity, initial_position, final_position, obstacles):
+def path_validity(initial_position, final_position, obstacles):
     path = []
 
     start_h = min(initial_position[0], final_position[0])
@@ -39,7 +39,6 @@ def path_validity(velocity, initial_position, final_position, obstacles):
     for move in h_moves:
         state = (move, initial_position[1])
         if state in obstacles:
-            #print('Oh no! obstacle in the path')
             return False
         path.append(state)
 
@@ -50,11 +49,9 @@ def path_validity(velocity, initial_position, final_position, obstacles):
     for move in v_moves:
         state = (final_position[0], move)
         if state in obstacles:
-            #print('Oh no! obstacle in the path')
             return False
         path.append(state)
 
-    #print("Path:", path)
     return True
 
 def validate_action(velocity,action):
@@ -68,13 +65,6 @@ def validate_action(velocity,action):
 
 
 def select_next_action(state, q_table, epsilon):
-    '''
-    Docstring for select_next_action
-    
-    :param state: Description
-    :param q_table: Description
-    :param epsilon: Description
-    '''
     best_expected_return = float('-inf') 
     all_actions = []
     possible_actions = q_table[state] 
@@ -130,7 +120,6 @@ def initial_state_action(starting_pos):
     else:
         intial_position = starting_pos
 
-    #print("Current position: ", intial_position)
     # initialize potential next position and velocity
     potential_action = random.sample(action_space, 1)[0]
     potential_vel = change_velocity(intial_velocity, potential_action)
@@ -182,7 +171,6 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
         velocity = change_velocity(velocity, action)
 
         potential_position = (position[0] + velocity[0], position[1] + velocity[1])
-        #print("Potential position: ", potential_position)
 
         # Validity path ckecks
         wall_check = (potential_position[0] in walls[0]) and (potential_position[1] in walls[1])
@@ -197,10 +185,6 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
             # if invalid path => reset
             position = generate_start()
             velocity = (0, 0)
-            #state = (position, velocity)
-            #travelled_states.append(state)
-
-        #print('Accepted position: ', position)
 
         if (position == target):
             # target not hit => end
@@ -218,10 +202,3 @@ def episode(q_table, epsilon, target, obstacles, explore=True, starting_pos=None
 
     return state_actions, route
 
-
-#episode()
-
-#state=((0,0),(2,2))
-#q_table = test.intialize_q_table()
-
-#select_next_action(state, q_table, 0.1)

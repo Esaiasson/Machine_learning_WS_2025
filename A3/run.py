@@ -5,12 +5,6 @@ import visualize_grid as vis
 from matplotlib import pyplot as plt
 
 
-'''
-for episodes in range(1,100):
-    s_a_pairs, route = game.episode(q_table, 0.1, target, obstacles, explore=True)
-    g_values = learn.calculate_g(s_a_pairs)
-    q_table = learn.update_q_table(q_table, g_values)        
-'''
 def calc_mean_path(episode, episode_lengths, path_lengths):
     sum = 0
     for key in path_lengths:
